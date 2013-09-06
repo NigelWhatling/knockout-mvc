@@ -17,7 +17,7 @@ namespace PerpetuumSoft.Knockout
 
   public class KnockoutContext<TModel> : IKnockoutContext
   {
-    public const string ViewModelName = "viewModel";
+    public readonly string ViewModelName = "viewModel";
 
     private TModel model;
 
@@ -37,14 +37,21 @@ namespace PerpetuumSoft.Knockout
       ContextStack = new List<IKnockoutContext>();
     }
 
+    public KnockoutContext(string modelName)
+    {
+        this.ViewModelName = modelName + "Model";
+        this.viewContext = null;
+        ContextStack = new List<IKnockoutContext>();
+    }
+
     private readonly ViewContext viewContext;
 
     private bool isInitialized;
 
-    private string GetInitializeData(TModel model, bool needBinding)
+    private string GetInitializeData(TModel model, string searchScope, bool needBinding)
     {
       if (isInitialized)
-        return "";
+        return String.Empty;
       isInitialized = true;
       KnockoutUtilities.ConvertData(model);
       this.model = model;
@@ -67,17 +74,36 @@ namespace PerpetuumSoft.Knockout
       }
       sb.Append(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
       if (needBinding)
-        sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+      {
+          if (searchScope == null)
+          {
+              sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+          }
+          else
+          {
+              sb.AppendLine(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, searchScope));
+          }
+      }
       sb.AppendLine(@"</script>");
       return sb.ToString();
     }
 
     public HtmlString Initialize(TModel model)
     {
-      return new HtmlString(GetInitializeData(model, false));
+        return this.Initialize(model, null);
+    }
+
+    public HtmlString Initialize(TModel model, string searchScope)
+    {
+      return new HtmlString(GetInitializeData(model, searchScope, false));
     }
 
     public HtmlString Apply(TModel model)
+    {
+        return this.Apply(model, null);
+    }
+
+    public HtmlString Apply(TModel model, string searchScope)
     {
       if (isInitialized)
       {
@@ -87,10 +113,15 @@ namespace PerpetuumSoft.Knockout
         sb.AppendLine(@"</script>");
         return new HtmlString(sb.ToString());
       }
-      return new HtmlString(GetInitializeData(model, true));
+      return new HtmlString(GetInitializeData(model, searchScope, true));
     }
 
     public HtmlString LazyApply(TModel model, string actionName, string controllerName)
+    {
+        return this.LazyApply(model, actionName, controllerName, null);
+    }
+
+    public HtmlString LazyApply(TModel model, string actionName, string controllerName, string searchScope)
     {
       var sb = new StringBuilder();
 
@@ -108,7 +139,14 @@ namespace PerpetuumSoft.Knockout
         sb.AppendLine(string.Format("var {0} = ko.mapping.fromJS(data, {0}MappingData); ", ViewModelName));
       }
       sb.Append(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
-      sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+      if (searchScope == null)
+      {
+          sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+      }
+      else
+      {
+          sb.AppendLine(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, searchScope));
+      }
 
       sb.AppendLine("}, error: function (error) { alert('There was an error posting the data to the server: ' + error.responseText); } });");
 
@@ -200,6 +238,14 @@ namespace PerpetuumSoft.Knockout
       {
         return new KnockoutHtml<TModel>(viewContext, this, CreateData().InstanceNames, CreateData().Aliases);
       }
+    }
+
+    public virtual KnockoutScript<TModel> Script
+    {
+        get
+        {
+            return new KnockoutScript<TModel>(viewContext, this, CreateData().InstanceNames, CreateData().Aliases);
+        }
     }
 
     public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null)
