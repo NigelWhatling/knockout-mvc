@@ -109,7 +109,15 @@ namespace PerpetuumSoft.Knockout
       {
         var sb = new StringBuilder();
         sb.AppendLine(@"<script type=""text/javascript"">");
-        sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+        if (searchScope == null)
+        {
+            sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+        }
+        else
+        {
+            sb.AppendLine(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, searchScope));
+        }
+
         sb.AppendLine(@"</script>");
         return new HtmlString(sb.ToString());
       }
