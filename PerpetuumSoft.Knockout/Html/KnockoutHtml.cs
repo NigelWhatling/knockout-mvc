@@ -40,9 +40,9 @@ namespace PerpetuumSoft.Knockout
       return Input(text, "password", htmlAttributes);
     }
 
-    public KnockoutTagBuilder<TModel> Hidden(object htmlAttributes = null)
+    public KnockoutTagBuilder<TModel> Hidden(Expression<Func<TModel, object>> text, object htmlAttributes = null)
     {
-      return Input(null, "hidden", htmlAttributes);
+      return Input(text, "hidden", htmlAttributes);
     }
 
     public KnockoutTagBuilder<TModel> RadioButton(Expression<Func<TModel, object>> @checked, object htmlAttributes = null)
