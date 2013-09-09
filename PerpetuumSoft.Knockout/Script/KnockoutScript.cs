@@ -23,8 +23,20 @@ namespace PerpetuumSoft.Knockout
         return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "()");
     }
 
+    public KnockoutScriptItem GetObservable(Expression<Func<TModel, object>> prop)
+    {
+        string name = KnockoutExpressionConverter.Convert(prop);
+        return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "()");
+    }
+
     public KnockoutScriptItem SetObservable(string name, string value)
     {
+        return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "(" + value + ")");
+    }
+
+    public KnockoutScriptItem SetObservable(Expression<Func<TModel, object>> prop, string value)
+    {
+        string name = KnockoutExpressionConverter.Convert(prop);
         return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "(" + value + ")");
     }
   }
