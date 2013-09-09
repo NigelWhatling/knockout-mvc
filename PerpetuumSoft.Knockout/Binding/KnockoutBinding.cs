@@ -179,7 +179,7 @@ namespace PerpetuumSoft.Knockout
 
     private readonly List<KnockoutBindingItem> items = new List<KnockoutBindingItem>();
 
-    private readonly Dictionary<string, KnockoutBingindComplexItem> complexItems = new Dictionary<string, KnockoutBingindComplexItem>();
+    private readonly Dictionary<string, KnockoutBindingComplexItem> complexItems = new Dictionary<string, KnockoutBindingComplexItem>();
 
     public List<KnockoutBindingItem> Items
     {
@@ -189,11 +189,11 @@ namespace PerpetuumSoft.Knockout
       }
     }
 
-    private KnockoutBingindComplexItem ComplexItem(string name)
+    private KnockoutBindingComplexItem ComplexItem(string name)
     {
       if (!complexItems.ContainsKey(name))
       {
-        complexItems[name] = new KnockoutBingindComplexItem { Name = name };
+          complexItems[name] = new KnockoutBindingComplexItem { Name = name };
         items.Add(complexItems[name]);
       }
       return complexItems[name];
