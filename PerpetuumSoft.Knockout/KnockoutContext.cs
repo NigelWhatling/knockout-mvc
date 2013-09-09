@@ -37,11 +37,14 @@ namespace PerpetuumSoft.Knockout
       ContextStack = new List<IKnockoutContext>();
     }
 
-    public KnockoutContext(string modelName)
+    public KnockoutContext(ViewContext viewContext, string modelName) : this(viewContext)
     {
         this.ViewModelName = modelName + "Model";
-        this.viewContext = null;
-        ContextStack = new List<IKnockoutContext>();
+    }
+
+    public KnockoutContext<TModel2> CreateContext<TModel2>(string modelName)
+    {
+        return new KnockoutContext<TModel2>(this.viewContext, modelName);
     }
 
     private readonly ViewContext viewContext;
