@@ -20,13 +20,14 @@ namespace PerpetuumSoft.Knockout
 
     public KnockoutScriptItem GetObservable(string name)
     {
-        return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "()");
+        //return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "()", isInline);
+        return new KnockoutScriptItem(name + "()");
     }
 
     public KnockoutScriptItem GetObservable(Expression<Func<TModel, object>> prop)
     {
         string name = KnockoutExpressionConverter.Convert(prop);
-        return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "()");
+        return new KnockoutScriptItem(name + "()");
     }
 
     public KnockoutScriptItem SetObservable(string name, string value)

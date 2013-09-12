@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Web.Mvc;
 using System.Web;
@@ -51,7 +52,7 @@ namespace PerpetuumSoft.Knockout
 
     private bool isInitialized;
 
-    private string GetInitializeData(TModel model, string searchScope, bool needBinding)
+    private string GetInitializeData(TModel model, string searchScope, bool needBinding, ReferenceLoopHandling referenceLoopHandling = ReferenceLoopHandling.Error)
     {
       if (isInitialized)
         return String.Empty;
@@ -61,7 +62,7 @@ namespace PerpetuumSoft.Knockout
 
       var sb = new StringBuilder();
 
-      var json = JsonConvert.SerializeObject(model);
+      var json = JsonConvert.SerializeObject(model, Formatting.None, new JsonSerializerSettings { ReferenceLoopHandling = referenceLoopHandling });
 
       sb.AppendLine(@"<script type=""text/javascript""> ");
       sb.AppendLine(string.Format("var {0}Js = {1};", ViewModelName, json));
@@ -101,30 +102,25 @@ namespace PerpetuumSoft.Knockout
       return new HtmlString(GetInitializeData(model, searchScope, false));
     }
 
-    public HtmlString Apply(TModel model)
-    {
-        return this.Apply(model, null);
-    }
-
-    public HtmlString Apply(TModel model, string searchScope)
+    public HtmlString Apply(TModel model, string SearchScope = null, ReferenceLoopHandling ReferenceLoopHandling = ReferenceLoopHandling.Error)
     {
       if (isInitialized)
       {
         var sb = new StringBuilder();
         sb.AppendLine(@"<script type=""text/javascript"">");
-        if (searchScope == null)
+        if (SearchScope == null)
         {
             sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
         }
         else
         {
-            sb.AppendLine(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, searchScope));
+            sb.AppendLine(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, SearchScope));
         }
 
         sb.AppendLine(@"</script>");
         return new HtmlString(sb.ToString());
       }
-      return new HtmlString(GetInitializeData(model, searchScope, true));
+      return new HtmlString(GetInitializeData(model, SearchScope, true, ReferenceLoopHandling));
     }
 
     public HtmlString LazyApply(TModel model, string actionName, string controllerName)
@@ -259,13 +255,34 @@ namespace PerpetuumSoft.Knockout
         }
     }
 
-    public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null)
+    public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, bool noModel = false)
     {
-      var url = Url().Action(actionName, controllerName, routeValues);
+        Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
+        RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
+        int i = 0;
+        foreach (PropertyInfo prop in routeValues.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (prop.PropertyType.IsAssignableFrom(typeof(KnockoutScriptItem)))
+            {
+                string token = "$$$" + (i++) + "$$$";
+                tokens.Add(token, (KnockoutScriptItem)prop.GetValue(routeValues, null));
+                newRoutes[prop.Name] = token;
+            }
+        }
+
+        var url = Url().Action(actionName, controllerName, newRoutes) ?? "/";
       url = url.Replace("%28", "(");
       url = url.Replace("%29", ")");
       url = url.Replace("%24", "$");
-      string exec = string.Format(@"executeOnServer({0}, '{1}')", ViewModelName, url);
+      string exec;
+      if (useAntiForgeryToken)
+      {
+          exec = string.Format(@"executeOnServer({0}, '{1}', '{2}')", noModel ? "null" : ViewModelName, url, this.GetAntiForgeryToken());
+      }
+      else
+      {
+          exec = string.Format(@"executeOnServer({0}, '{1}')", noModel ? "null" : ViewModelName, url);
+      }
       int startIndex = 0;
       const string parentPrefix = "$parentContext.";
       while (exec.Substring(startIndex).Contains("$index()"))
@@ -283,12 +300,42 @@ namespace PerpetuumSoft.Knockout
         exec = exec.Substring(0, index) + "'+" + pattern + "+'" + exec.Substring(index + pattern.Length);
         startIndex = index + pattern.Length;
       }
+
+      
+        foreach (string token in tokens.Keys)
+        {
+            exec = exec.Replace(token, "'+" + tokens[token].ToHtmlString() + "+'");
+        }
+
       return new MvcHtmlString(exec);
     }
 
     protected UrlHelper Url()
     {
       return new UrlHelper(viewContext.RequestContext);
+    }
+
+    protected string GetAntiForgeryToken()
+    {
+        string pattern = "value=\"";
+        string tokenHtml = System.Web.Helpers.AntiForgery.GetHtml().ToHtmlString();
+        int start = tokenHtml.IndexOf(pattern);
+        tokenHtml = tokenHtml.Substring(start + pattern.Length);
+        return tokenHtml.Substring(0, tokenHtml.IndexOf('"'));
+    }
+
+    protected class ViewDataContainer : IViewDataContainer
+    {
+        public ViewDataDictionary ViewData
+        {
+            get;
+            set;
+        }
+
+        public ViewDataContainer(ViewDataDictionary viewData)
+        {
+            this.ViewData = viewData;
+        }
     }
   }
 }

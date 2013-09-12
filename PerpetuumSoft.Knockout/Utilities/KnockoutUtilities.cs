@@ -21,7 +21,7 @@ namespace PerpetuumSoft.Knockout
       if (data == null)
         return;
       var type = data.GetType();
-	  if (type.Namespace == null)
+	  if (type.Namespace == null || typeof(System.Web.Mvc.Controller).IsAssignableFrom(type))
 		  return;
       if (type.IsClass && type.Namespace.Equals("System.Data.Entity.DynamicProxies"))
           type = type.BaseType;
@@ -52,7 +52,13 @@ namespace PerpetuumSoft.Knockout
         if (typeof(string).IsAssignableFrom(type))
           return "";
         if (typeof(IList).IsAssignableFrom(type))
-          return type.GetConstructor(new Type[0]).Invoke(null);
+        {
+            ConstructorInfo constructor = type.GetConstructor(new Type[0]);
+            if (constructor != null)
+            {
+                return constructor.Invoke(null);
+            }
+        }
       }
       return value;
     }

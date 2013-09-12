@@ -21,5 +21,10 @@ namespace PerpetuumSoft.Knockout
       {
           return this._Text;
       }
+
+      public override string ToString()
+      {
+          return this.ToHtmlString();
+      }
   }
 }

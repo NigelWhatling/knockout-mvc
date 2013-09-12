@@ -55,6 +55,12 @@ namespace PerpetuumSoft.Knockout
       return this;
     }
 
+    public KnockoutBinding<TModel> Value(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("value", binding, isWord));
+        return this;
+    }
+
     public KnockoutBinding<TModel> Disable(Expression<Func<TModel, bool>> binding)
     {
       Items.Add(new KnockoutBindingItem<TModel, bool> { Name = "disable", Expression = binding });
@@ -148,24 +154,37 @@ namespace PerpetuumSoft.Knockout
     }
 
     // *** Events ***
-    protected virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues)
+    protected virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues, bool useAntiForgeryToken = false, bool noModel = false)
     {
       var sb = new StringBuilder();
       sb.Append("function() {");
-      sb.Append(Context.ServerAction(actionName, controllerName, routeValues));
+      sb.Append(Context.ServerAction(actionName, controllerName, routeValues, useAntiForgeryToken, noModel));
       sb.Append(";}");
       Items.Add(new KnockoutBindingStringItem(eventName, sb.ToString(), false));
       return this;
     }
 
-    public KnockoutBinding<TModel> Click(string actionName, string controllerName, object routeValues = null)
+    public KnockoutBinding<TModel> Click(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, bool noModel = false)
     {
-      return Event("click", actionName, controllerName, routeValues);
+        return Event("click", actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
     }
 
-    public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null)
+    public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false)
     {
-      return Event("submit", actionName, controllerName, routeValues);
+        return Event("submit", actionName, controllerName, routeValues, useAntiForgeryToken);
+    }
+
+    // *** Flow Control *** 
+    public KnockoutBinding<TModel> If(Expression<Func<TModel, object>> binding)
+    {
+        Items.Add(new KnockoutBindingItem<TModel, object> { Name = "if", Expression = binding });
+        return this;
+    }
+
+    public KnockoutBinding<TModel> If(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("if", binding, isWord));
+        return this;
     }
 
     // *** Custom ***    
