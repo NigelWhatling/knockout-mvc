@@ -40,7 +40,7 @@ namespace PerpetuumSoft.Knockout
 
     public KnockoutContext(ViewContext viewContext, string modelName) : this(viewContext)
     {
-        this.ViewModelName = modelName + "Model";
+        this.ViewModelName = modelName;
     }
 
     public KnockoutContext<TModel2> CreateContext<TModel2>(string modelName)
@@ -257,16 +257,20 @@ namespace PerpetuumSoft.Knockout
 
     public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, bool noModel = false)
     {
-        Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
         RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
-        int i = 0;
-        foreach (PropertyInfo prop in routeValues.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
+
+        if (routeValues != null)
         {
-            if (prop.PropertyType.IsAssignableFrom(typeof(KnockoutScriptItem)))
+            int i = 0;
+            foreach (PropertyInfo prop in routeValues.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
-                string token = "$$$" + (i++) + "$$$";
-                tokens.Add(token, (KnockoutScriptItem)prop.GetValue(routeValues, null));
-                newRoutes[prop.Name] = token;
+                if (prop.PropertyType.IsAssignableFrom(typeof(KnockoutScriptItem)))
+                {
+                    string token = "$$$" + (i++) + "$$$";
+                    tokens.Add(token, (KnockoutScriptItem)prop.GetValue(routeValues, null));
+                    newRoutes[prop.Name] = token;
+                }
             }
         }
 
@@ -300,7 +304,6 @@ namespace PerpetuumSoft.Knockout
         exec = exec.Substring(0, index) + "'+" + pattern + "+'" + exec.Substring(index + pattern.Length);
         startIndex = index + pattern.Length;
       }
-
       
         foreach (string token in tokens.Keys)
         {
