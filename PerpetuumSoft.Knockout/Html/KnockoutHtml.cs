@@ -59,6 +59,21 @@ namespace PerpetuumSoft.Knockout
       return tagBuilder;
     }
 
+    public KnockoutTagBuilder<TModel> Date(Expression<Func<TModel, object>> date, object htmlAttributes = null)
+    {
+        return Input(date, "date", htmlAttributes);
+    }
+
+    public KnockoutTagBuilder<TModel> Email(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+    {
+        return Input(text, "email", htmlAttributes);
+    }
+
+    public KnockoutTagBuilder<TModel> Url(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+    {
+        return Input(text, "url", htmlAttributes);
+    }
+
     public KnockoutTagBuilder<TModel> TextArea(Expression<Func<TModel, object>> text, object htmlAttributes = null)
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "textarea", InstanceNames, Aliases);
