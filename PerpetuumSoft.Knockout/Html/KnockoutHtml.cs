@@ -172,11 +172,11 @@ namespace PerpetuumSoft.Knockout
       return tagBuilder;
     }
 
-    public KnockoutTagBuilder<TModel> Button(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null)
+    public KnockoutTagBuilder<TModel> Button(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false, bool noModel = false)
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "button", InstanceNames, Aliases);
       tagBuilder.ApplyAttributes(htmlAttributes);
-      tagBuilder.Click(actionName, controllerName, routeValues);
+      tagBuilder.Click(actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
       tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
       return tagBuilder;
     }
