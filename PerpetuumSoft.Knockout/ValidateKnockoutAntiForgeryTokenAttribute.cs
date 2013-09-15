@@ -33,10 +33,10 @@
                     }
 
                     string cookieToken = cookie.Value;
-                    string headerToken = context.Request.Headers[RequestVerificationHeaderName];
+                    string headerToken = context.Request.Headers[RequestVerificationHeaderName] ?? context.Request.Form[AntiForgeryConfig.CookieName];
                     if (headerToken == null)
                     {
-                        throw new HttpAntiForgeryException("Request Verification Token header missing.");
+                        throw new HttpAntiForgeryException("Request Verification Token missing.");
                     }
 
                     AntiForgery.Validate(cookieToken, headerToken);
