@@ -189,16 +189,28 @@ namespace PerpetuumSoft.Knockout
       tagBuilder.Click(actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
       tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
       return tagBuilder;
-    }    
+    }
 
-    public KnockoutFormContext<TModel> Form(string actionName, string controllerName, object routeValues = null, object htmlAttributes = null)
+    public KnockoutFormContext<TModel> Form(string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false)
     {
       var formContext = new KnockoutFormContext<TModel>(
         viewContext, 
         Context, InstanceNames, Aliases, 
-        actionName, controllerName, routeValues, htmlAttributes);
+        actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken);
       formContext.WriteStart(viewContext.Writer);
       return formContext;
-    }    
+    }
+
+    public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false)
+    {
+        var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
+        var formContext = new KnockoutFormContext<TSubModel>(
+          viewContext,
+          this.Context.CreateContext<TSubModel>(this.Context.ViewModelName + "." + expression),
+          InstanceNames, Aliases,
+          actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken);
+        formContext.WriteStart(viewContext.Writer);
+        return formContext;
+    }
   }
 }
