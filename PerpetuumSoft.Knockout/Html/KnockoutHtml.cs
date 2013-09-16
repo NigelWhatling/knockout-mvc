@@ -201,14 +201,16 @@ namespace PerpetuumSoft.Knockout
       return formContext;
     }
 
-    public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false)
+    public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
+        bool useAntiForgeryToken = false, Expression<Func<TModel, TSubModel>> bindingOut = null, KnockoutExecuteEvents events = null)
     {
-        var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
+        string expression = KnockoutExpressionConverter.Convert(binding, CreateData());
+        string expression2 = KnockoutExpressionConverter.Convert(bindingOut, CreateData());
         var formContext = new KnockoutFormContext<TSubModel>(
           viewContext,
           this.Context.CreateContext<TSubModel>(this.Context.ViewModelName + "." + expression),
           InstanceNames, Aliases,
-          actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken);
+          actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken, this.Context.ViewModelName + "." + expression2, events);
         formContext.WriteStart(viewContext.Writer);
         return formContext;
     }

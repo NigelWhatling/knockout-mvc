@@ -154,11 +154,12 @@ namespace PerpetuumSoft.Knockout
     }
 
     // *** Events ***
-    protected virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues, bool useAntiForgeryToken = false, bool noModel = false)
+    protected virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues,
+        bool useAntiForgeryToken = false, bool noModel = false, string bindingOut = null, KnockoutExecuteEvents events = null)
     {
       var sb = new StringBuilder();
       sb.Append("function() {");
-      sb.Append(Context.ServerAction(actionName, controllerName, routeValues, useAntiForgeryToken, noModel));
+      sb.Append(Context.ServerAction(actionName, controllerName, routeValues, useAntiForgeryToken, noModel, bindingOut, events));
       sb.Append(";}");
       Items.Add(new KnockoutBindingStringItem(eventName, sb.ToString(), false));
       return this;
@@ -169,9 +170,9 @@ namespace PerpetuumSoft.Knockout
         return Event("click", actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
     }
 
-    public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false)
+    public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, string bindingOut = null, KnockoutExecuteEvents events = null)
     {
-        return Event("submit", actionName, controllerName, routeValues, useAntiForgeryToken);
+        return Event("submit", actionName, controllerName, routeValues, useAntiForgeryToken, bindingOut: bindingOut, events: events);
     }
 
     // *** Flow Control *** 

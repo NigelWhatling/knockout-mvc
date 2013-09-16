@@ -15,11 +15,13 @@ namespace PerpetuumSoft.Knockout
     private readonly object routeValues;
     private readonly object htmlAttributes;
     private readonly bool useAntiForgeryToken;
+    private readonly string bindingOut;
+    private readonly KnockoutExecuteEvents events;
 
     public KnockoutFormContext(
       ViewContext viewContext,
       KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases,
-      string actionName, string controllerName, object routeValues, object htmlAttributes, bool useAntiForgeryToken)
+      string actionName, string controllerName, object routeValues, object htmlAttributes, bool useAntiForgeryToken = false, string bindingOut = null, KnockoutExecuteEvents events = null)
       : base(viewContext)
     {
       this.context = context;
@@ -30,6 +32,8 @@ namespace PerpetuumSoft.Knockout
       this.routeValues = routeValues;
       this.htmlAttributes = htmlAttributes;
       this.useAntiForgeryToken = useAntiForgeryToken;
+      this.bindingOut = bindingOut;
+      this.events = events;
       InStack = false;
     }
 
@@ -37,7 +41,7 @@ namespace PerpetuumSoft.Knockout
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(context, "form", instanceNames, aliases);
       tagBuilder.ApplyAttributes(htmlAttributes);
-      tagBuilder.Submit(actionName, controllerName, routeValues, this.useAntiForgeryToken);
+      tagBuilder.Submit(actionName, controllerName, routeValues, this.useAntiForgeryToken, this.bindingOut, this.events);
       tagBuilder.TagRenderMode = TagRenderMode.StartTag;
       writer.WriteLine(tagBuilder.ToHtmlString());
     }

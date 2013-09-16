@@ -255,7 +255,8 @@ namespace PerpetuumSoft.Knockout
         }
     }
 
-    public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, bool noModel = false)
+    public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null,
+        bool useAntiForgeryToken = false, bool noModel = false, string bindingOut = null, KnockoutExecuteEvents events = null)
     {
         RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
         Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
@@ -278,15 +279,59 @@ namespace PerpetuumSoft.Knockout
       url = url.Replace("%28", "(");
       url = url.Replace("%29", ")");
       url = url.Replace("%24", "$");
-      string exec;
+      StringBuilder sb = new StringBuilder();
+      sb.AppendFormat("executeOnServer({0}, '{1}'", noModel ? "null" : ViewModelName, url);
       if (useAntiForgeryToken)
       {
-          exec = string.Format(@"executeOnServer({0}, '{1}', '{2}')", noModel ? "null" : ViewModelName, url, this.GetAntiForgeryToken());
+          sb.Append(", '");
+          sb.Append(this.GetAntiForgeryToken());
+          sb.Append("'");
       }
-      else
+
+      if (!String.IsNullOrWhiteSpace(bindingOut))
       {
-          exec = string.Format(@"executeOnServer({0}, '{1}')", noModel ? "null" : ViewModelName, url);
+          sb.Append(", ");
+          sb.Append(bindingOut);
       }
+
+      if (events != null)
+      {
+          bool isFirst = true;
+          sb.Append(", {");
+          if (events.BeforeSend != null)
+          {
+              sb.Append("beforeSend: ");
+              sb.Append(events.BeforeSend);
+              isFirst = false;
+          }
+
+          if (events.Complete != null)
+          {
+              sb.Append(isFirst ? " " : " ,");
+              sb.Append("complete: ");
+              sb.Append(events.Complete);
+              isFirst = false;
+          }
+          if (events.Error != null)
+          {
+              sb.Append(isFirst ? " " : " ,");
+              sb.Append("error: ");
+              sb.Append(events.Error);
+              isFirst = false;
+          }
+          if (events.Success != null)
+          {
+              sb.Append(isFirst ? " " : " ,");
+              sb.Append("success: ");
+              sb.Append(events.Success);
+              isFirst = false;
+          }
+
+          sb.Append("}");
+      }
+
+      sb.Append(")");
+      string exec = sb.ToString();
       int startIndex = 0;
       const string parentPrefix = "$parentContext.";
       while (exec.Substring(startIndex).Contains("$index()"))
