@@ -155,24 +155,24 @@ namespace PerpetuumSoft.Knockout
 
     // *** Events ***
     protected virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues,
-        bool useAntiForgeryToken = false, bool noModel = false, string bindingOut = null, KnockoutExecuteEvents events = null)
+        string bindingOut = null, string bindingIn = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null)
     {
       var sb = new StringBuilder();
       sb.Append("function() {");
-      sb.Append(Context.ServerAction(actionName, controllerName, routeValues, useAntiForgeryToken, noModel, bindingOut, events));
+      sb.Append(Context.ServerAction(actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, useAntiForgeryToken: useAntiForgeryToken, settings: settings));
       sb.Append(";}");
       Items.Add(new KnockoutBindingStringItem(eventName, sb.ToString(), false));
       return this;
     }
 
-    public KnockoutBinding<TModel> Click(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, bool noModel = false)
+    public KnockoutBinding<TModel> Click(string actionName, string controllerName, object routeValues = null, string bindingOut = null, string bindingIn = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null)
     {
-        return Event("click", actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
+        return Event("click", actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, useAntiForgeryToken: useAntiForgeryToken, settings: settings);
     }
 
-    public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, string bindingOut = null, KnockoutExecuteEvents events = null)
+    public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null, string bindingOut = null, string bindingIn = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null)
     {
-        return Event("submit", actionName, controllerName, routeValues, useAntiForgeryToken, bindingOut: bindingOut, events: events);
+        return Event("submit", actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, useAntiForgeryToken: useAntiForgeryToken, settings: settings);
     }
 
     // *** Flow Control *** 

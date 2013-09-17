@@ -172,21 +172,21 @@ namespace PerpetuumSoft.Knockout
       return tagBuilder;
     }
 
-    public KnockoutTagBuilder<TModel> Button(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false, bool noModel = false)
+    public KnockoutTagBuilder<TModel> Button(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false, bool noData = false)
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "button", InstanceNames, Aliases);
       tagBuilder.ApplyAttributes(htmlAttributes);
-      tagBuilder.Click(actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
+      tagBuilder.Click(actionName, controllerName, routeValues, bindingOut: noData ? "null" : null, useAntiForgeryToken: useAntiForgeryToken);
       tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
       return tagBuilder;
     }
 
-    public KnockoutTagBuilder<TModel> HyperlinkButton(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false, bool noModel = false)
+    public KnockoutTagBuilder<TModel> HyperlinkButton(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false, bool noData = false)
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "a", InstanceNames, Aliases);
       tagBuilder.ApplyAttributes(htmlAttributes);
       tagBuilder.ApplyAttributes(new { href = "#" });
-      tagBuilder.Click(actionName, controllerName, routeValues, useAntiForgeryToken, noModel);
+      tagBuilder.Click(actionName, controllerName, routeValues, bindingOut: noData ? "null" : null, useAntiForgeryToken: useAntiForgeryToken);
       tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
       return tagBuilder;
     }
@@ -196,21 +196,35 @@ namespace PerpetuumSoft.Knockout
       var formContext = new KnockoutFormContext<TModel>(
         viewContext, 
         Context, InstanceNames, Aliases, 
-        actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken);
+        actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken: useAntiForgeryToken);
       formContext.WriteStart(viewContext.Writer);
       return formContext;
     }
 
-    public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
-        bool useAntiForgeryToken = false, Expression<Func<TModel, TSubModel>> bindingOut = null, KnockoutExecuteEvents events = null)
+    public KnockoutFormContext<TModel> Form(Expression<Func<TModel, object>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
+      bool useAntiForgeryToken = false, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
     {
-        string expression = KnockoutExpressionConverter.Convert(binding, CreateData());
-        string expression2 = KnockoutExpressionConverter.Convert(bindingOut, CreateData());
+        string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
+        string modelIn = bindingIn == null ? null : this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(bindingIn, CreateData());
+        var formContext = new KnockoutFormContext<TModel>(
+          viewContext,
+          this.Context.CreateContext<TModel>(modelOut),
+          InstanceNames, Aliases,
+          actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, useAntiForgeryToken: useAntiForgeryToken, settings: settings);
+        formContext.WriteStart(viewContext.Writer);
+        return formContext;
+    }
+
+    public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
+        bool useAntiForgeryToken = false, Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
+    {
+        string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
+        string modelIn = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(bindingIn, CreateData());
         var formContext = new KnockoutFormContext<TSubModel>(
           viewContext,
-          this.Context.CreateContext<TSubModel>(this.Context.ViewModelName + "." + expression),
+          this.Context.CreateContext<TSubModel>(modelOut),
           InstanceNames, Aliases,
-          actionName, controllerName, routeValues, htmlAttributes, useAntiForgeryToken, this.Context.ViewModelName + "." + expression2, events);
+          actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, useAntiForgeryToken: useAntiForgeryToken, settings: settings);
         formContext.WriteStart(viewContext.Writer);
         return formContext;
     }

@@ -92,12 +92,7 @@ namespace PerpetuumSoft.Knockout
       return sb.ToString();
     }
 
-    public HtmlString Initialize(TModel model)
-    {
-        return this.Initialize(model, null);
-    }
-
-    public HtmlString Initialize(TModel model, string searchScope)
+    public HtmlString Initialize(TModel model, string searchScope = null)
     {
       return new HtmlString(GetInitializeData(model, searchScope, false));
     }
@@ -123,40 +118,37 @@ namespace PerpetuumSoft.Knockout
       return new HtmlString(GetInitializeData(model, SearchScope, true, ReferenceLoopHandling));
     }
 
-    public HtmlString LazyApply(TModel model, string actionName, string controllerName)
-    {
-        return this.LazyApply(model, actionName, controllerName, null);
-    }
-
-    public HtmlString LazyApply(TModel model, string actionName, string controllerName, string searchScope)
+    public HtmlString LazyApply(TModel model, string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null, string searchScope = null)
     {
       var sb = new StringBuilder();
-
-      sb.AppendLine(@"<script type=""text/javascript""> ");
-      sb.Append("$(document).ready(function() {");
-
-      sb.AppendLine(string.Format("$.ajax({{ url: '{0}', type: 'POST', success: function (data) {{", Url().Action(actionName, controllerName)));
+      
+      sb.Append("function (data) { ");
 
       string mappingData = KnockoutJsModelBuilder.CreateMappingData<TModel>();
       if (mappingData == "{}")
-        sb.AppendLine(string.Format("var {0} = ko.mapping.fromJS(data); ", ViewModelName));
+        sb.Append(string.Format("var {0} = ko.mapping.fromJS(data); ", ViewModelName));
       else
       {
-        sb.AppendLine(string.Format("var {0}MappingData = {1};", ViewModelName, mappingData));
-        sb.AppendLine(string.Format("var {0} = ko.mapping.fromJS(data, {0}MappingData); ", ViewModelName));
+        sb.Append(string.Format("var {0}MappingData = {1}; ", ViewModelName, mappingData));
+        sb.Append(string.Format("var {0} = ko.mapping.fromJS(data, {0}MappingData); ", ViewModelName));
       }
       sb.Append(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
       if (searchScope == null)
       {
-          sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
+          sb.Append(string.Format("ko.applyBindings({0});", ViewModelName));
       }
       else
       {
-          sb.AppendLine(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, searchScope));
+          sb.Append(string.Format(@"ko.applyBindings({0}, $(""{1}"").get(0));", ViewModelName, searchScope));
       }
 
-      sb.AppendLine("}, error: function (error) { alert('There was an error posting the data to the server: ' + error.responseText); } });");
-
+        sb.Append("}");
+        
+        string overrideFunction = sb.ToString();
+        sb = new StringBuilder();
+        sb.AppendLine(@"<script type=""text/javascript""> ");
+      sb.Append("$(document).ready(function() {");
+      sb.Append(this.ServerAction(actionName, controllerName, routeValues: routeValues, bindingOut: "null", useAntiForgeryToken: useAntiForgeryToken, settings: settings, successOverride: overrideFunction));
       sb.Append("});");
       sb.AppendLine(@"</script>");
 
@@ -256,8 +248,16 @@ namespace PerpetuumSoft.Knockout
     }
 
     public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null,
-        bool useAntiForgeryToken = false, bool noModel = false, string bindingOut = null, KnockoutExecuteEvents events = null)
+        string bindingOut = null, string bindingIn = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null, string successOverride = null)
     {
+        bool settingsProvided = settings != null;
+        if (!settingsProvided)
+        {
+            settings = new KnockoutExecuteSettings();
+        }
+
+        settings.SendAntiForgeryToken &= useAntiForgeryToken;
+
         RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
         Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
 
@@ -280,57 +280,18 @@ namespace PerpetuumSoft.Knockout
       url = url.Replace("%29", ")");
       url = url.Replace("%24", "$");
       StringBuilder sb = new StringBuilder();
-      sb.AppendFormat("executeOnServer({0}, '{1}'", noModel ? "null" : ViewModelName, url);
-      if (useAntiForgeryToken)
+      sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? ViewModelName, url);
+      if (useAntiForgeryToken || settings.SendAntiForgeryToken || bindingIn != null || settingsProvided || successOverride != null)
       {
-          sb.Append(", '");
-          sb.Append(this.GetAntiForgeryToken());
-          sb.Append("'");
-      }
-
-      if (!String.IsNullOrWhiteSpace(bindingOut))
-      {
-          sb.Append(", ");
-          sb.Append(bindingOut);
-      }
-
-      if (events != null)
-      {
-          bool isFirst = true;
-          sb.Append(", {");
-          if (events.BeforeSend != null)
-          {
-              sb.Append("beforeSend: ");
-              sb.Append(events.BeforeSend);
-              isFirst = false;
-          }
-
-          if (events.Complete != null)
-          {
-              sb.Append(isFirst ? " " : " ,");
-              sb.Append("complete: ");
-              sb.Append(events.Complete);
-              isFirst = false;
-          }
-          if (events.Error != null)
-          {
-              sb.Append(isFirst ? " " : " ,");
-              sb.Append("error: ");
-              sb.Append(events.Error);
-              isFirst = false;
-          }
-          if (events.Success != null)
-          {
-              sb.Append(isFirst ? " " : " ,");
-              sb.Append("success: ");
-              sb.Append(events.Success);
-              isFirst = false;
-          }
-
-          sb.Append("}");
+          sb.AppendFormat(", {0}, {1}, {2}, {3}",
+            (useAntiForgeryToken || settings.SendAntiForgeryToken) ? "'" + this.GetAntiForgeryToken() + "'" : "null",
+            bindingIn ?? "null",
+            settingsProvided ? settings.ToString() : "null",
+            successOverride != null ? successOverride : "null");
       }
 
       sb.Append(")");
+
       string exec = sb.ToString();
       int startIndex = 0;
       const string parentPrefix = "$parentContext.";
