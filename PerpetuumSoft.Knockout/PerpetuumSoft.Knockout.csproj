@@ -72,8 +72,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binding\KnockoutBindingComplexItem.cs" />
     <Compile Include="Binding\KnockoutBingindComplexItem.cs" />
     <Compile Include="Binding\KnockoutBindingStringItem.cs" />
+    <Compile Include="Script\KnockoutScriptItem.cs" />
+    <Compile Include="Script\KnockoutScript.cs" />
     <Compile Include="SubContexts\KnockoutCommonRegionContext.cs" />
     <Compile Include="SubContexts\KnockoutIfContext.cs" />
     <Compile Include="SubContexts\KnockoutWithContext.cs" />
@@ -119,6 +122,7 @@
   <ItemGroup>
     <Content Include="Scripts\perpetuum.knockout.js" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
