@@ -26,7 +26,7 @@ namespace PerpetuumSoft.Knockout
       for (int i = 0; i < subItems.Count; i++)
       {
         if (i != 0)
-          sb.Append(",");
+          sb.Append(", ");
         sb.Append(subItems[i].GetKnockoutExpression(data));
       }
       sb.Append('}');

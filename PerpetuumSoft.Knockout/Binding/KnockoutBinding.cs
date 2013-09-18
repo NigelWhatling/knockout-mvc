@@ -67,10 +67,22 @@ namespace PerpetuumSoft.Knockout
       return this;
     }
 
+    public KnockoutBinding<TModel> Disable(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("disable", binding, isWord));
+        return this;
+    }
+
     public KnockoutBinding<TModel> Enable(Expression<Func<TModel, bool>> binding)
     {
       Items.Add(new KnockoutBindingItem<TModel, bool> { Name = "enable", Expression = binding });
       return this;
+    }
+
+    public KnockoutBinding<TModel> Enable(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("enable", binding, isWord));
+        return this;
     }
 
     public KnockoutBinding<TModel> Checked(Expression<Func<TModel, object>> binding)
@@ -79,10 +91,22 @@ namespace PerpetuumSoft.Knockout
       return this;
     }
 
+    public KnockoutBinding<TModel> Checked(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("checked", binding, isWord));
+        return this;
+    }
+
     public KnockoutBinding<TModel> Options(Expression<Func<TModel, IEnumerable>> binding)
     {
       Items.Add(new KnockoutBindingItem<TModel, IEnumerable> { Name = "options", Expression = binding });
       return this;
+    }
+
+    public KnockoutBinding<TModel> Options(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("options", binding, isWord));
+        return this;
     }
 
     public KnockoutBinding<TModel> SelectedOptions(Expression<Func<TModel, IEnumerable>> binding)
@@ -91,22 +115,40 @@ namespace PerpetuumSoft.Knockout
       return this;
     }
 
+    public KnockoutBinding<TModel> SelectedOptions(string binding, bool isWord = false)
+    {
+        Items.Add(new KnockoutBindingStringItem("selectedOptions", binding, isWord));
+        return this;
+    }
+
     public KnockoutBinding<TModel> OptionsCaption(Expression<Func<TModel, object>> binding)
     {
       Items.Add(new KnockoutBindingItem<TModel, object> { Name = "optionsCaption", Expression = binding });
       return this;
     }
 
-    public KnockoutBinding<TModel> OptionsCaption(string text)
+    public KnockoutBinding<TModel> OptionsCaption(string binding, bool isWord = false)
     {
-      Items.Add(new KnockoutBindingStringItem("optionsCaption", text));
+      Items.Add(new KnockoutBindingStringItem("optionsCaption", binding));
       return this;
+    }
+
+    public KnockoutBinding<TModel> OptionsText(Expression<Func<TModel, object>> binding)
+    {
+        Items.Add(new KnockoutBindingItem<TModel, object> { Name = "optionsText", Expression = binding });
+        return this;
     }
 
     public KnockoutBinding<TModel> OptionsText(string text, bool isWord = false)
     {
       Items.Add(new KnockoutBindingStringItem("optionsText", text, isWord));
       return this;
+    }
+
+    public KnockoutBinding<TModel> OptionsValue(Expression<Func<TModel, object>> binding)
+    {
+        Items.Add(new KnockoutBindingItem<TModel, object> { Name = "optionsValue", Expression = binding });
+        return this;
     }
 
     public KnockoutBinding<TModel> OptionsValue(string text, bool isWord = false)
@@ -245,7 +287,7 @@ namespace PerpetuumSoft.Knockout
         if (first)
           first = false;
         else
-          sb.Append(',');        
+          sb.Append(", ");        
         sb.Append(item.GetKnockoutExpression(CreateData()));
       }
       return sb.ToString();
