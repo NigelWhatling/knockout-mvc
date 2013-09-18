@@ -1,4 +1,5 @@
-﻿namespace PerpetuumSoft.Knockout
+﻿using System.Globalization;
+namespace PerpetuumSoft.Knockout
 {
     using System;
     using System.Collections.Generic;
@@ -34,7 +35,7 @@
                 }
 
                 sb.Append(" ");
-                sb.Append(prop.Name.Substring(0, 1).ToLower());
+                sb.Append(prop.Name.Substring(0, 1).ToLower(CultureInfo.InvariantCulture));
                 sb.Append(prop.Name.Substring(1));
                 sb.Append(" : ");
                 sb.Append(prop.GetValue(this, null));

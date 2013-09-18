@@ -258,27 +258,7 @@ namespace PerpetuumSoft.Knockout
 
         settings.SendAntiForgeryToken &= useAntiForgeryToken;
 
-        RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
-        Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
-
-        if (routeValues != null)
-        {
-            int i = 0;
-            foreach (PropertyInfo prop in routeValues.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
-            {
-                if (prop.PropertyType.IsAssignableFrom(typeof(KnockoutScriptItem)))
-                {
-                    string token = "$$$" + (i++) + "$$$";
-                    tokens.Add(token, (KnockoutScriptItem)prop.GetValue(routeValues, null));
-                    newRoutes[prop.Name] = token;
-                }
-            }
-        }
-
-        var url = Url().Action(actionName, controllerName, newRoutes) ?? "/";
-      url = url.Replace("%28", "(");
-      url = url.Replace("%29", ")");
-      url = url.Replace("%24", "$");
+      string url = this.GetActionUrl(actionName, controllerName, routeValues);
       StringBuilder sb = new StringBuilder();
       sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? ViewModelName, url);
       if (useAntiForgeryToken || settings.SendAntiForgeryToken || bindingIn != null || settingsProvided || successOverride != null)
@@ -311,12 +291,39 @@ namespace PerpetuumSoft.Knockout
         startIndex = index + pattern.Length;
       }
       
-        foreach (string token in tokens.Keys)
+      return new MvcHtmlString(exec);
+    }
+
+    public string GetActionUrl(string actionName, string controllerName, object routeValues)
+    {
+        RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
+        Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
+
+        if (routeValues != null)
         {
-            exec = exec.Replace(token, "'+" + tokens[token].ToHtmlString() + "+'");
+            int i = 0;
+            foreach (PropertyInfo prop in routeValues.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (prop.PropertyType.IsAssignableFrom(typeof(KnockoutScriptItem)))
+                {
+                    string token = "$$$" + (i++) + "$$$";
+                    tokens.Add(token, (KnockoutScriptItem)prop.GetValue(routeValues, null));
+                    newRoutes[prop.Name] = token;
+                }
+            }
         }
 
-      return new MvcHtmlString(exec);
+        string url = Url().Action(actionName, controllerName, newRoutes) ?? "/";
+        url = url.Replace("%28", "(")
+                 .Replace("%29", ")")
+                 .Replace("%24", "$");
+
+        foreach (string token in tokens.Keys)
+        {
+            url = url.Replace(token, "'+" + tokens[token].ToHtmlString() + "+'");
+        }
+
+        return url;
     }
 
     protected UrlHelper Url()

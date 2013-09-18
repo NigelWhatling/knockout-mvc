@@ -181,6 +181,15 @@ namespace PerpetuumSoft.Knockout
       return tagBuilder;
     }
 
+    public KnockoutTagBuilder<TModel> ActionLink(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null)
+    {
+        var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "a", InstanceNames, Aliases);
+        tagBuilder.ApplyAttributes(htmlAttributes);
+        tagBuilder.Attr("href", this.Context.GetActionUrl(actionName, controllerName, routeValues));
+        tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
+        return tagBuilder;
+    }
+
     public KnockoutTagBuilder<TModel> HyperlinkButton(string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, bool useAntiForgeryToken = false, bool noData = false)
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "a", InstanceNames, Aliases);
