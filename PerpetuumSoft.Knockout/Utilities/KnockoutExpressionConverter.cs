@@ -37,7 +37,7 @@ namespace PerpetuumSoft.Knockout
       return expr;
     }
 
-    protected virtual string Visit(Expression exp)
+    protected virtual string Visit(Expression exp, bool plainMember = false)
     {
       if (exp == null)
         throw new ArgumentNullException();
@@ -107,7 +107,7 @@ namespace PerpetuumSoft.Knockout
         case ExpressionType.Parameter:
           return VisitParameter((ParameterExpression)exp);
         case ExpressionType.MemberAccess:
-          return VisitMemberAccess((MemberExpression)exp);
+          return VisitMemberAccess((MemberExpression)exp, plainMember);
         case ExpressionType.Call:
           return VisitMethodCall((MethodCallExpression)exp);
         case ExpressionType.Lambda:
@@ -127,14 +127,14 @@ namespace PerpetuumSoft.Knockout
           throw new Exception(string.Format("Unhandled expression type: '{0}'", exp.NodeType));
       }
     }
-    
-    protected virtual string VisitMemberAccess(MemberExpression m)
+
+    protected virtual string VisitMemberAccess(MemberExpression m, bool plainMember = false)
     {      
-      return VisitMemberAccess(m.Expression, m.Member.Name);
+      return VisitMemberAccess(m.Expression, m.Member.Name, plainMember);
     }
 
     //TODO: rewrite
-    private string VisitMemberAccess(Expression obj, string member)
+    private string VisitMemberAccess(Expression obj, string member, bool plainMember = false)
     {      
       if (typeof(IKnockoutContext).IsAssignableFrom(obj.Type))
       {
@@ -143,7 +143,7 @@ namespace PerpetuumSoft.Knockout
         if (member == "Model")
           return context.GetInstanceName();
       }
-      var own = Visit(obj);
+      var own = Visit(obj, true);
       if (data.Aliases.ContainsKey(own))
         own = data.Aliases[own];
       if (lambdaFrom.Contains(own))
@@ -151,7 +151,7 @@ namespace PerpetuumSoft.Knockout
       if ((member == "Length" || member == "Count") && !data.InstanceNames.Contains(own))
         member = "length";
       string prefix = own == "" ? "" : own + ".";
-      string suffix = member == "length" ? "" : "()";
+      string suffix = member == "length" || plainMember ? "" : "()";
       string result = prefix + member + suffix;
       if (data.Aliases.ContainsKey(result))
         result = data.Aliases[result];
