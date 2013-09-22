@@ -29,6 +29,12 @@ namespace PerpetuumSoft.Knockout
                     continue;
                 }
 
+                object value = prop.GetValue(this, null);
+                if (value == null)
+                {
+                    continue;
+                }
+
                 if (!isFirst)
                 {
                     sb.Append(",");
@@ -39,6 +45,7 @@ namespace PerpetuumSoft.Knockout
                 sb.Append(prop.Name.Substring(1));
                 sb.Append(" : ");
                 sb.Append(prop.GetValue(this, null));
+                isFirst = false;
             }
 
             sb.Append("}");
