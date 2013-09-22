@@ -46,6 +46,11 @@ namespace PerpetuumSoft.Knockout
 
     public TagRenderMode TagRenderMode { get; set; }
 
+      public string ToHtmlStringNoBinding()
+      {
+          return tagBuilder.ToString(TagRenderMode);
+      }
+
     public override string ToHtmlString()
     {
       tagBuilder.Attributes["data-bind"] = BindingAttributeContent();

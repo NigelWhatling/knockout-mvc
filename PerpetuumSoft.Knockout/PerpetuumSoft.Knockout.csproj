@@ -75,6 +75,7 @@
     <Compile Include="Binding\KnockoutBindingComplexItem.cs" />
     <Compile Include="Binding\KnockoutBingindComplexItem.cs" />
     <Compile Include="Binding\KnockoutBindingStringItem.cs" />
+    <Compile Include="Html\KnockoutTemplateContext.cs" />
     <Compile Include="Html\KnockoutExecuteSettings.cs" />
     <Compile Include="Script\KnockoutScriptItem.cs" />
     <Compile Include="Script\KnockoutScript.cs" />

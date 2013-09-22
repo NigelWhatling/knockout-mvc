@@ -228,7 +228,7 @@ namespace PerpetuumSoft.Knockout
         bool useAntiForgeryToken = false, Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
     {
         string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
-        string modelIn = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(bindingIn, CreateData());
+        string modelIn = bindingIn != null ? this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
         var formContext = new KnockoutFormContext<TSubModel>(
           viewContext,
           this.Context.CreateContext<TSubModel>(modelOut),
@@ -236,6 +236,17 @@ namespace PerpetuumSoft.Knockout
           actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, useAntiForgeryToken: useAntiForgeryToken, settings: settings);
         formContext.WriteStart(viewContext.Writer);
         return formContext;
+    }
+
+    public KnockoutTemplateContext<TModel> Template(Expression<Func<TModel, object>> binding, string templateId)
+    {
+        var templateContext = new KnockoutTemplateContext<TModel>(
+          viewContext,
+          this.Context,
+          InstanceNames, Aliases,
+          templateId);
+        templateContext.WriteStart(viewContext.Writer);
+        return templateContext;
     }
   }
 }

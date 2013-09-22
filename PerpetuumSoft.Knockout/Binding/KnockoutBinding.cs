@@ -236,6 +236,29 @@ namespace PerpetuumSoft.Knockout
         return this;
     }
 
+      // *** Templating ***
+    public KnockoutBinding<TModel> Template(string templateId, Expression<Func<TModel, object>> dataBinding = null, Expression<Func<TModel, object>> ifBinding = null, Expression<Func<TModel, object>> foreachBinding = null)
+    {
+        this.ComplexItem("template").Add(new KnockoutBindingStringItem("name", templateId, true));
+
+        if (dataBinding != null)
+        {
+            this.ComplexItem("template").Add(new KnockoutBindingItem<TModel, object> { Name = "data", Expression = dataBinding });
+        }
+
+        if (ifBinding != null)
+        {
+            this.ComplexItem("template").Add(new KnockoutBindingItem<TModel, object> { Name = "if", Expression = dataBinding });
+        }
+
+        if (foreachBinding != null)
+        {
+            this.ComplexItem("template").Add(new KnockoutBindingItem<TModel, object> { Name = "foreach", Expression = dataBinding });
+        }
+
+        return this;
+    }
+
     // *** Custom ***    
     public KnockoutBinding<TModel> Custom(string name, string value)
     {
