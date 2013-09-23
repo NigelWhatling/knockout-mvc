@@ -213,8 +213,8 @@ namespace PerpetuumSoft.Knockout
     public KnockoutFormContext<TModel> Form(Expression<Func<TModel, object>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
       bool useAntiForgeryToken = false, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
     {
-        string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
-        string modelIn = bindingIn == null ? null : this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(bindingIn, CreateData());
+        string modelOut = KnockoutExpressionConverter.Convert(binding, CreateData());
+        string modelIn = bindingIn == null ? null : KnockoutExpressionConverter.Convert(bindingIn, CreateData());
         var formContext = new KnockoutFormContext<TModel>(
           viewContext,
           this.Context.CreateContext<TModel>(modelOut),
@@ -227,8 +227,8 @@ namespace PerpetuumSoft.Knockout
     public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
         bool useAntiForgeryToken = false, Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
     {
-        string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
-        string modelIn = bindingIn != null ? this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
+        string modelOut = KnockoutExpressionConverter.Convert(binding, CreateData());
+        string modelIn = bindingIn != null ? KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
         var formContext = new KnockoutFormContext<TSubModel>(
           viewContext,
           this.Context.CreateContext<TSubModel>(modelOut),
