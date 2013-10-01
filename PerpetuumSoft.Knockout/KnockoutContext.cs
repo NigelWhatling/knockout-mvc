@@ -173,6 +173,16 @@ namespace PerpetuumSoft.Knockout
       return regionContext;
     }
 
+    public KnockoutForeachContext<TItem> ForeachContext<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
+    {
+        var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
+        var regionContext = new KnockoutForeachContext<TItem>(viewContext, expression, false);
+        regionContext.WriteStart(viewContext.Writer);
+        regionContext.ContextStack = ContextStack;
+        ContextStack.Add(regionContext);
+        return regionContext;
+    }
+
     public KnockoutWithContext<TItem> With<TItem>(Expression<Func<TModel, TItem>> binding)
     {
       var expression = KnockoutExpressionConverter.Convert(binding, CreateData());

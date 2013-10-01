@@ -5,7 +5,7 @@ namespace PerpetuumSoft.Knockout
 {
   public abstract class KnockoutCommonRegionContext<TModel> : KnockoutRegionContext<TModel>   
   {
-    protected string Expression { get; set; }    
+    public string Expression { get; set; }    
 
     public KnockoutCommonRegionContext(ViewContext viewContext, string expression)
       :base(viewContext)

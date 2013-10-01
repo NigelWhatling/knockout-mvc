@@ -224,6 +224,31 @@ namespace PerpetuumSoft.Knockout
     }
 
     // *** Flow Control *** 
+
+    public KnockoutBinding<TModel> ForEach(Expression<Func<TModel, object>> binding)
+    {
+        Items.Add(new KnockoutBindingItem<TModel, object> { Name = "foreach", Expression = binding });
+        return this;
+    }
+
+    public KnockoutBinding<TModel> ForEach(string binding)
+    {
+        Items.Add(new KnockoutBindingStringItem("foreach", binding, false));
+        return this;
+    }
+
+    public KnockoutBinding<TModel> ForEach()
+    {
+        KnockoutCommonRegionContext<TModel> context = this.Context as KnockoutCommonRegionContext<TModel>;
+        if (context == null)
+        {
+            throw new InvalidOperationException("ForEach() must be used within ForEachContext.");
+        }
+
+        Items.Add(new KnockoutBindingStringItem("foreach", context.Expression, false));
+        return this;
+    }
+
     public KnockoutBinding<TModel> If(Expression<Func<TModel, object>> binding)
     {
         Items.Add(new KnockoutBindingItem<TModel, object> { Name = "if", Expression = binding });
