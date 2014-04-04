@@ -14,4 +14,4 @@ $edit = $method.StartPoint.CreateEditPoint();
 $edit.LineDown()
 $edit.CharRight(1)
 $edit.Insert([Environment]::NewLine)
-$edit.Insert("      ModelBinders.Binders.DefaultBinder = new PerpetuumSoft.Knockout.KnockoutModelBinder();")
+$edit.Insert("      ModelBinders.Binders.DefaultBinder = new KnockoutMvc.KnockoutModelBinder();")

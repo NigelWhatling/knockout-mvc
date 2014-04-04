@@ -26,12 +26,12 @@ Generated JavaScript code is based on Knockout.js and that is why it works under
             <dependency id="jQuery" version="1.7" />
         </dependencies>
         <references>
-            <reference file="PerpetuumSoft.Knockout.dll" />
+            <reference file="KnockoutMvc.dll" />
         </references>
     </metadata>
     <files>
-        <file src="..\PerpetuumSoft.Knockout\Scripts\perpetuum.knockout.js" target="content\Scripts\perpetuum.knockout.js" />
-        <file src="..\PerpetuumSoft.Knockout\bin\Release\PerpetuumSoft.Knockout.dll" target="lib\net40\PerpetuumSoft.Knockout.dll" />
+        <file src="..\KnockoutMvc\Scripts\knockout.mvc.js" target="content\Scripts\knockout.mvc.js" />
+        <file src="..\KnockoutMvc.Knockout\bin\Release\KnockoutMvc.dll" target="lib\net40\KnockoutMvc.dll" />
         <file src="install.ps1" target="tools\install.ps1" />
     </files>
 </package>

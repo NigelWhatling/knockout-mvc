@@ -153,7 +153,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\perpetuum.knockout.js" />
+    <Content Include="Scripts\knockout.mvc.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Attributes\" />

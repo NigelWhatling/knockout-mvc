@@ -221,7 +221,7 @@
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PerpetuumSoft.Knockout\KnockoutMvc.csproj">
+    <ProjectReference Include="..\KnockoutMvc\KnockoutMvc.csproj">
       <Project>{25C6EE67-C272-4B3C-83BD-CEC6EFAC7AE9}</Project>
       <Name>KnockoutMvc</Name>
     </ProjectReference>
