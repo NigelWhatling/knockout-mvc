@@ -30,7 +30,7 @@ namespace PerpetuumSoft.Knockout
       var sb = new StringBuilder();
 
       sb.Append(Name);
-      sb.Append(" : ");
+      sb.Append(": ");
       if (NeedQuotes)
         sb.Append('\'');
       sb.Append(Value);

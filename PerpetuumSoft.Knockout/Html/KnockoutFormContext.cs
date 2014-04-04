@@ -14,7 +14,6 @@ namespace PerpetuumSoft.Knockout
     private readonly string controllerName;
     private readonly object routeValues;
     private readonly object htmlAttributes;
-    private readonly bool useAntiForgeryToken;
     private readonly string bindingOut;
     private readonly string bindingIn;
     private readonly KnockoutExecuteSettings settings;
@@ -22,7 +21,7 @@ namespace PerpetuumSoft.Knockout
     public KnockoutFormContext(
       ViewContext viewContext,
       KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases,
-      string actionName, string controllerName, object routeValues, object htmlAttributes, string bindingOut = null, string bindingIn = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null)
+      string actionName, string controllerName, object routeValues, object htmlAttributes, string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
       : base(viewContext)
     {
       this.context = context;
@@ -34,7 +33,6 @@ namespace PerpetuumSoft.Knockout
       this.htmlAttributes = htmlAttributes;
       this.bindingOut = bindingOut;
       this.bindingIn = bindingIn;
-      this.useAntiForgeryToken = useAntiForgeryToken;
       this.settings = settings;
       InStack = false;
     }
@@ -43,7 +41,7 @@ namespace PerpetuumSoft.Knockout
     {
       var tagBuilder = new KnockoutTagBuilder<TModel>(context, "form", instanceNames, aliases);
       tagBuilder.ApplyAttributes(htmlAttributes);
-      tagBuilder.Submit(actionName, controllerName, routeValues, bindingOut: this.bindingOut, bindingIn: this.bindingIn, useAntiForgeryToken: this.useAntiForgeryToken, settings: this.settings);
+      tagBuilder.Submit(actionName, controllerName, routeValues, bindingOut: this.bindingOut, bindingIn: this.bindingIn, settings: this.settings);
       tagBuilder.TagRenderMode = TagRenderMode.StartTag;
       writer.WriteLine(tagBuilder.ToHtmlString());
     }

@@ -30,12 +30,19 @@ namespace PerpetuumSoft.Knockout
       }
     }
 
+    public bool UseAntiForgeryToken
+    {
+        get;
+        set;
+    }
+
     protected List<IKnockoutContext> ContextStack { get; set; }
 
     public KnockoutContext(ViewContext viewContext)
     {
       this.viewContext = viewContext;
-      ContextStack = new List<IKnockoutContext>();
+      this.ContextStack = new List<IKnockoutContext>();
+      this.UseAntiForgeryToken = true;
     }
 
     public KnockoutContext(ViewContext viewContext, string modelName) : this(viewContext)
@@ -103,6 +110,11 @@ namespace PerpetuumSoft.Knockout
       {
         var sb = new StringBuilder();
         sb.AppendLine(@"<script type=""text/javascript"">");
+        if (this.UseAntiForgeryToken)
+        {
+            sb.AppendLine(this.GetAntiForgeryToken());
+        }
+
         if (SearchScope == null)
         {
             sb.AppendLine(string.Format("ko.applyBindings({0});", ViewModelName));
@@ -118,7 +130,8 @@ namespace PerpetuumSoft.Knockout
       return new HtmlString(GetInitializeData(model, SearchScope, true, ReferenceLoopHandling));
     }
 
-    public HtmlString LazyApply(TModel model, string actionName, string controllerName, object routeValues = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null, string searchScope = null)
+    public HtmlString LazyApply(TModel model, string actionName, string controllerName, object routeValues = null,
+        string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null, string searchScope = null)
     {
       var sb = new StringBuilder();
       
@@ -126,11 +139,11 @@ namespace PerpetuumSoft.Knockout
 
       string mappingData = KnockoutJsModelBuilder.CreateMappingData<TModel>();
       if (mappingData == "{}")
-        sb.Append(string.Format("var {0} = ko.mapping.fromJS(data); ", ViewModelName));
+        sb.Append(string.Format("{0} = ko.mapping.fromJS(data); ", bindingIn ?? ViewModelName));
       else
       {
         sb.Append(string.Format("var {0}MappingData = {1}; ", ViewModelName, mappingData));
-        sb.Append(string.Format("var {0} = ko.mapping.fromJS(data, {0}MappingData); ", ViewModelName));
+        sb.Append(string.Format("{0} = ko.mapping.fromJS(data, {0}MappingData); ", bindingIn ?? ViewModelName));
       }
       sb.Append(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
       if (searchScope == null)
@@ -147,9 +160,15 @@ namespace PerpetuumSoft.Knockout
         string overrideFunction = sb.ToString();
         sb = new StringBuilder();
         sb.AppendLine(@"<script type=""text/javascript""> ");
-      sb.Append("$(document).ready(function() {");
-      sb.Append(this.ServerAction(actionName, controllerName, routeValues: routeValues, bindingOut: "null", useAntiForgeryToken: useAntiForgeryToken, settings: settings, successOverride: overrideFunction));
-      sb.Append("});");
+        if (this.UseAntiForgeryToken)
+        {
+            sb.AppendLine(this.GetAntiForgeryToken());
+        }
+
+        sb.AppendLine(String.Format("var {0};", ViewModelName));
+      sb.Append("$(document).ready(function() { ");
+      sb.Append(this.ServerAction(actionName, controllerName, routeValues: routeValues, bindingIn: bindingIn, bindingOut: bindingOut, settings: settings, successOverride: overrideFunction));
+      sb.AppendLine(" });");
       sb.AppendLine(@"</script>");
 
       return new HtmlString(sb.ToString());
@@ -253,12 +272,13 @@ namespace PerpetuumSoft.Knockout
     {
         get
         {
-            return new KnockoutScript<TModel>(viewContext, this, CreateData().InstanceNames, CreateData().Aliases);
+            //return new KnockoutScript<TModel>(viewContext, this, CreateData().InstanceNames, CreateData().Aliases);
+            return new KnockoutScript<TModel>(viewContext, this, new string[] { ViewModelName }, null);
         }
     }
 
     public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null,
-        string bindingOut = null, string bindingIn = null, bool useAntiForgeryToken = false, KnockoutExecuteSettings settings = null, string successOverride = null)
+        string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null, string successOverride = null)
     {
         bool settingsProvided = settings != null;
         if (!settingsProvided)
@@ -266,21 +286,18 @@ namespace PerpetuumSoft.Knockout
             settings = new KnockoutExecuteSettings();
         }
 
-        settings.SendAntiForgeryToken &= useAntiForgeryToken;
-
       string url = this.GetActionUrl(actionName, controllerName, routeValues);
       StringBuilder sb = new StringBuilder();
       sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? ViewModelName, url);
-      if (useAntiForgeryToken || settings.SendAntiForgeryToken || bindingIn != null || settingsProvided || successOverride != null)
+      if (bindingIn != null || settingsProvided || successOverride != null)
       {
-          sb.AppendFormat(", {0}, {1}, {2}, {3}",
-            (useAntiForgeryToken || settings.SendAntiForgeryToken) ? "'" + this.GetAntiForgeryToken() + "'" : "null",
+          sb.AppendFormat(", {0}, {1}, {2}",
             bindingIn ?? "null",
             settingsProvided ? settings.ToString() : "null",
             successOverride != null ? successOverride : "null");
       }
 
-      sb.Append(")");
+      sb.Append(");");
 
       string exec = sb.ToString();
       int startIndex = 0;
@@ -333,6 +350,11 @@ namespace PerpetuumSoft.Knockout
             url = url.Replace(token, "'+" + tokens[token].ToHtmlString() + "+'");
         }
 
+        if (url.EndsWith("+''"))
+        {
+            url = url.Substring(0, url.Length - 3);
+        }
+
         return url;
     }
 
@@ -347,7 +369,7 @@ namespace PerpetuumSoft.Knockout
         string tokenHtml = System.Web.Helpers.AntiForgery.GetHtml().ToHtmlString();
         int start = tokenHtml.IndexOf(pattern);
         tokenHtml = tokenHtml.Substring(start + pattern.Length);
-        return tokenHtml.Substring(0, tokenHtml.IndexOf('"'));
+        return String.Format("var ko_CSRF_Token = '{0}';", tokenHtml.Substring(0, tokenHtml.IndexOf('"')));
     }
 
     protected class ViewDataContainer : IViewDataContainer

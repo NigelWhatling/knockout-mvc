@@ -11,7 +11,6 @@ namespace PerpetuumSoft.Knockout
     public class KnockoutExecuteSettings
     {
         public string RequestType { get; set; }
-        public bool SendAntiForgeryToken { get; set; }
 
         public string Complete { get; set; }
         public string Success { get; set; }
@@ -24,11 +23,6 @@ namespace PerpetuumSoft.Knockout
             bool isFirst = true;
             foreach (PropertyInfo prop in this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
-                if (prop.Name == "SendAntiForgeryToken")
-                {
-                    continue;
-                }
-
                 object value = prop.GetValue(this, null);
                 if (value == null)
                 {

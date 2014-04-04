@@ -26,8 +26,8 @@ namespace PerpetuumSoft.Knockout
 
     public KnockoutScriptItem GetObservable(Expression<Func<TModel, object>> prop)
     {
-        string name = KnockoutExpressionConverter.Convert(prop);
-        return new KnockoutScriptItem(name + "()");
+        string name = KnockoutExpressionConverter.Convert(prop, CreateData());
+        return new KnockoutScriptItem(name + (name[0] == '(' ? String.Empty : "()"));
     }
 
     public KnockoutScriptItem SetObservable(string name, string value)
