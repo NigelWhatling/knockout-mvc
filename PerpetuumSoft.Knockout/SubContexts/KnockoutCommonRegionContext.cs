@@ -1,28 +1,28 @@
-﻿using System.IO;
-using System.Web.Mvc;
-
-namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
-  public abstract class KnockoutCommonRegionContext<TModel> : KnockoutRegionContext<TModel>   
-  {
-    public string Expression { get; set; }    
+    using System.IO;
+    using System.Web.Mvc;
 
-    public KnockoutCommonRegionContext(ViewContext viewContext, string expression)
-      :base(viewContext)
+    public abstract class KnockoutCommonRegionContext<TModel> : KnockoutRegionContext<TModel>
     {
-      Expression = expression;      
-    }
+        public string Expression { get; set; }
 
-    public override void WriteStart(TextWriter writer)
-    {
-      writer.WriteLine(string.Format(@"<!-- ko {0}: {1} -->", Keyword, Expression));
-    }
+        public KnockoutCommonRegionContext(ViewContext viewContext, string expression)
+            : base(viewContext)
+        {
+            Expression = expression;
+        }
 
-    protected override void WriteEnd(TextWriter writer)
-    {
-      writer.WriteLine(@"<!-- /ko -->");     
-    }
+        public override void WriteStart(TextWriter writer)
+        {
+            writer.WriteLine(string.Format(@"<!-- ko {0}: {1} -->", Keyword, Expression));
+        }
 
-    protected abstract string Keyword { get; }
-  }
+        protected override void WriteEnd(TextWriter writer)
+        {
+            writer.WriteLine(@"<!-- /ko -->");
+        }
+
+        protected abstract string Keyword { get; }
+    }
 }

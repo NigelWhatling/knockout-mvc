@@ -1,19 +1,20 @@
-﻿using System.Web.Mvc;
-
-namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
-  public class KnockoutIfContext<TModel> : KnockoutCommonRegionContext<TModel>
-  {
-    public KnockoutIfContext(ViewContext viewContext, string expression) : base(viewContext, expression)
-    {
-    }
+    using System.Web.Mvc;
 
-    protected override string Keyword
+    public class KnockoutIfContext<TModel> : KnockoutCommonRegionContext<TModel>
     {
-      get
-      {
-        return "if";
-      }
+        public KnockoutIfContext(ViewContext viewContext, string expression)
+            : base(viewContext, expression)
+        {
+        }
+
+        protected override string Keyword
+        {
+            get
+            {
+                return "if";
+            }
+        }
     }
-  }
 }

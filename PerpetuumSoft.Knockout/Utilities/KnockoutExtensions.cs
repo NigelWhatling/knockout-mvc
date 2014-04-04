@@ -1,12 +1,12 @@
-﻿using System.Web.Mvc;
-
-namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
-  public static class KnockoutExtensions
-  {
-    public static KnockoutContext<TModel> CreateKnockoutContext<TModel>(this HtmlHelper<TModel> helper, bool useAntiForgeryToken = true)
+    using System.Web.Mvc;
+
+    public static class KnockoutExtensions
     {
-        return new KnockoutContext<TModel>(helper.ViewContext) { UseAntiForgeryToken = useAntiForgeryToken };
+        public static KnockoutContext<TModel> CreateKnockoutContext<TModel>(this HtmlHelper<TModel> helper, bool useAntiForgeryToken = true)
+        {
+            return new KnockoutContext<TModel>(helper.ViewContext) { UseAntiForgeryToken = useAntiForgeryToken };
+        }
     }
-  }
 }

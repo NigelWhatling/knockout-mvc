@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("PerpetuumSoft.Knockout")]
+[assembly: AssemblyTitle("KnockoutMVC")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Perpetuum Software LLC")]
-[assembly: AssemblyProduct("PerpetuumSoft.Knockout")]
-[assembly: AssemblyCopyright("© 2012–2013 Perpetuum Software LLC")]
+[assembly: AssemblyCompany("N-Vision Australia Pty Ltd")]
+[assembly: AssemblyProduct("KnockoutMVC")]
+[assembly: AssemblyCopyright("© 2013-2014 N-Vision Australia Pty Ltd")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,14 +1,14 @@
-﻿using System.Web.Mvc;
-
-namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
-  public class KnockoutModelBinder : DefaultModelBinder
-  {
-    public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
+    using System.Web.Mvc;
+
+    public class KnockoutModelBinder : DefaultModelBinder
     {
-      var result = base.BindModel(controllerContext, bindingContext);
-      KnockoutUtilities.ConvertData(result);
-      return result;
+        public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
+        {
+            var result = base.BindModel(controllerContext, bindingContext);
+            KnockoutUtilities.ConvertData(result);
+            return result;
+        }
     }
-  }
 }

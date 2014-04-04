@@ -1,7 +1,7 @@
-﻿namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
-  public enum KnockoutValueUpdateKind
-  {
-    Change, KeyUp, KeyPress, AfterKeyDown
-  }
+    public enum KnockoutValueUpdateKind
+    {
+        Change, KeyUp, KeyPress, AfterKeyDown
+    }
 }

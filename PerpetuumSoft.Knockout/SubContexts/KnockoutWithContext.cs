@@ -1,19 +1,20 @@
-﻿using System.Web.Mvc;
-
-namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
-  public class KnockoutWithContext<TModel> : KnockoutCommonRegionContext<TModel>
-  {
-    public KnockoutWithContext(ViewContext viewContext, string expression) : base(viewContext, expression)
-    {
-    }
+    using System.Web.Mvc;
 
-    protected override string Keyword
+    public class KnockoutWithContext<TModel> : KnockoutCommonRegionContext<TModel>
     {
-      get
-      {
-        return "with";
-      }
+        public KnockoutWithContext(ViewContext viewContext, string expression)
+            : base(viewContext, expression)
+        {
+        }
+
+        protected override string Keyword
+        {
+            get
+            {
+                return "with";
+            }
+        }
     }
-  }
 }

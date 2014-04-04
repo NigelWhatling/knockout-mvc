@@ -1,4 +1,4 @@
-﻿namespace PerpetuumSoft.Knockout
+﻿namespace KnockoutMvc
 {
     using System;
     using System.Collections.Generic;

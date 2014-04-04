@@ -8,8 +8,8 @@
     <ProjectGuid>{25C6EE67-C272-4B3C-83BD-CEC6EFAC7AE9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PerpetuumSoft.Knockout</RootNamespace>
-    <AssemblyName>PerpetuumSoft.Knockout</AssemblyName>
+    <RootNamespace>KnockoutMvc</RootNamespace>
+    <AssemblyName>KnockoutMvc</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -37,6 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />

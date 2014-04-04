@@ -5,10 +5,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		KnockoutIntegration.vsmdi = KnockoutIntegration.vsmdi
 		Local.testsettings = Local.testsettings
+		README.md = README.md
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerpetuumSoft.Knockout", "PerpetuumSoft.Knockout\PerpetuumSoft.Knockout.csproj", "{25C6EE67-C272-4B3C-83BD-CEC6EFAC7AE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnockoutMvc", "PerpetuumSoft.Knockout\KnockoutMvc.csproj", "{25C6EE67-C272-4B3C-83BD-CEC6EFAC7AE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnockoutMvcDemo", "KnockoutMvcDemo\KnockoutMvcDemo.csproj", "{8C24ECDE-045D-4487-8BFB-ACA46E6A0A7E}"
 EndProject
