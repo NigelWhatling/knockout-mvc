@@ -71,9 +71,9 @@
     <Compile Include="TestModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PerpetuumSoft.Knockout\PerpetuumSoft.Knockout.csproj">
-      <Project>{25C6EE67-C272-4B3C-83BD-CEC6EFAC7AE9}</Project>
-      <Name>PerpetuumSoft.Knockout</Name>
+    <ProjectReference Include="..\KnockoutMvc\KnockoutMvc.csproj">
+      <Project>{25c6ee67-c272-4b3c-83bd-cec6efac7ae9}</Project>
+      <Name>KnockoutMvc</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

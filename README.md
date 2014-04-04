@@ -17,3 +17,4 @@ MIT license - [http://www.opensource.org/licenses/mit-license.php](http://www.op
 
 ##Copyright
 [© 2012–2013 Perpetuum Software LLC](http://www.perpetuumsoft.com/)
+© 2013–2014 N-Vision Australia Pty Ltd
