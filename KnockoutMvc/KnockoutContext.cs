@@ -63,7 +63,10 @@
         private string GetInitializeData(TModel model, string searchScope, bool needBinding, ReferenceLoopHandling referenceLoopHandling = ReferenceLoopHandling.Error)
         {
             if (isInitialized)
+            {
                 return String.Empty;
+            }
+
             isInitialized = true;
             KnockoutUtilities.ConvertData(model);
             this.model = model;
@@ -72,7 +75,12 @@
 
             var json = JsonConvert.SerializeObject(model, Formatting.None, new JsonSerializerSettings { ReferenceLoopHandling = referenceLoopHandling });
 
-            sb.AppendLine(@"<script type=""text/javascript""> ");
+            sb.AppendLine(@"<script type=""text/javascript"">");
+            if (this.UseAntiForgeryToken)
+            {
+                sb.AppendLine(this.GetAntiForgeryToken());
+            }
+
             sb.AppendLine(string.Format("var {0}Js = {1};", ViewModelName, json));
             var mappingData = KnockoutJsModelBuilder.CreateMappingData<TModel>();
             if (mappingData == "{}")
@@ -370,7 +378,7 @@
             string tokenHtml = System.Web.Helpers.AntiForgery.GetHtml().ToHtmlString();
             int start = tokenHtml.IndexOf(pattern);
             tokenHtml = tokenHtml.Substring(start + pattern.Length);
-            return String.Format("var ko_CSRF_Token = '{0}';", tokenHtml.Substring(0, tokenHtml.IndexOf('"')));
+            return String.Format("var ko_CSRF_Token = \"{0}\";", tokenHtml.Substring(0, tokenHtml.IndexOf('"')));
         }
 
         protected class ViewDataContainer : IViewDataContainer
