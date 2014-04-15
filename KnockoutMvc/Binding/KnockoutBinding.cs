@@ -207,9 +207,19 @@
             string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
         {
             var sb = new StringBuilder();
-            sb.Append("function() {");
-            sb.Append(Context.ServerAction(actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, settings: settings));
-            sb.Append(";}");
+            
+            if (eventName == "submit")
+            {
+                sb.Append("function(formElement) { ");
+                sb.Append(Context.FormServerAction(actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, settings: settings));
+            }
+            else
+            {
+                sb.Append("function() { ");
+                sb.Append(Context.ServerAction(actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, settings: settings));
+            }
+
+            sb.Append("; }");
             Items.Add(new KnockoutBindingStringItem(eventName, sb.ToString(), false));
             return this;
         }

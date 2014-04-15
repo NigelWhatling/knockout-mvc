@@ -20,12 +20,27 @@
 
         private KnockoutTagBuilder<TModel> Input(Expression<Func<TModel, object>> text, string type, object htmlAttributes = null)
         {
-            var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "input", InstanceNames, Aliases);
+            var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "input", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
+
+            string name = ExpressionHelper.GetExpressionText(text);
+            tagBuilder.ApplyAttributes(new { id = name, name = name });
+
+            // Add unobtrusive validation attributes
+            ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(text, this.Context.htmlHelper.ViewData);
+            IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
+            tagBuilder.ApplyAttributes(validationAttributes);
+
             if (!string.IsNullOrWhiteSpace(type))
+            {
                 tagBuilder.ApplyAttributes(new { type });
+            }
+
             if (text != null)
+            {
                 tagBuilder.Value(text);
+            }
+
             tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
             return tagBuilder;
         }
@@ -67,6 +82,11 @@
         public KnockoutTagBuilder<TModel> Email(Expression<Func<TModel, object>> text, object htmlAttributes = null)
         {
             return Input(text, "email", htmlAttributes);
+        }
+
+        public KnockoutTagBuilder<TModel> File(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        {
+            return Input(text, "file", htmlAttributes);
         }
 
         public KnockoutTagBuilder<TModel> Url(Expression<Func<TModel, object>> text, object htmlAttributes = null)

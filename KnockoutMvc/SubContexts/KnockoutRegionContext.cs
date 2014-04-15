@@ -6,13 +6,16 @@
 
     public abstract class KnockoutRegionContext<TModel> : KnockoutContext<TModel>, IDisposable
     {
-        public KnockoutRegionContext(ViewContext viewContext)
-            : base(viewContext)
+        public KnockoutRegionContext(KnockoutContext<TModel> context)
+            : base(context)
         {
-            if (viewContext == null)
-                throw new ArgumentNullException("viewContext");
-            writer = viewContext.Writer;
-            InStack = true;
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
+            this.writer = this.htmlHelper.ViewContext.Writer;
+            this.InStack = true;
         }
 
         public bool InStack { get; set; }

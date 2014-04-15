@@ -6,8 +6,8 @@
     {
         private bool useVirtualElement;
 
-        public KnockoutForeachContext(ViewContext viewContext, string expression, bool useVirtualElement = true)
-            : base(viewContext, expression)
+        public KnockoutForeachContext(KnockoutContext<TModel> context, string expression, bool useVirtualElement = true)
+            : base(context, expression)
         {
             this.useVirtualElement = useVirtualElement;
         }

@@ -22,7 +22,7 @@
           ViewContext viewContext,
           KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases,
           string actionName, string controllerName, object routeValues, object htmlAttributes, string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
-            : base(viewContext)
+            : base(context)
         {
             this.context = context;
             this.instanceNames = instanceNames;

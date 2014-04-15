@@ -38,25 +38,37 @@
 
         protected List<IKnockoutContext> ContextStack { get; set; }
 
-        public KnockoutContext(ViewContext viewContext)
+        public KnockoutContext(KnockoutContext<TModel> context)
+            : this(context.htmlHelper)
         {
-            this.viewContext = viewContext;
+        }
+
+        public KnockoutContext(HtmlHelper<TModel> htmlHelper)
+        {
+            this.htmlHelper = htmlHelper;
+            this.viewContext = htmlHelper.ViewContext;
             this.ContextStack = new List<IKnockoutContext>();
             this.UseAntiForgeryToken = true;
         }
 
-        public KnockoutContext(ViewContext viewContext, string modelName)
-            : this(viewContext)
+        public KnockoutContext(HtmlHelper<TModel> htmlHelper, string modelName)
+            : this(htmlHelper)
         {
             this.ViewModelName = modelName;
         }
 
+        public KnockoutContext<TModel2> CreateContext<TModel2>()
+        {
+            return new KnockoutContext<TModel2>(new HtmlHelper<TModel2>(this.viewContext, this.htmlHelper.ViewDataContainer, this.htmlHelper.RouteCollection));
+        }
+
         public KnockoutContext<TModel2> CreateContext<TModel2>(string modelName)
         {
-            return new KnockoutContext<TModel2>(this.viewContext, modelName);
+            return new KnockoutContext<TModel2>(new HtmlHelper<TModel2>(this.viewContext, this.htmlHelper.ViewDataContainer, this.htmlHelper.RouteCollection), modelName);
         }
 
         private readonly ViewContext viewContext;
+        internal readonly HtmlHelper<TModel> htmlHelper;
 
         private bool isInitialized;
 
@@ -92,7 +104,8 @@
                 sb.AppendLine(string.Format("var {0}MappingData = {1};", ViewModelName, mappingData));
                 sb.AppendLine(string.Format("var {0} = ko.mapping.fromJS({0}Js, {0}MappingData); ", ViewModelName));
             }
-            sb.Append(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
+            sb.AppendLine(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
+            sb.AppendLine("ko.mvc.init(" + ViewModelName + ");");
             if (needBinding)
             {
                 if (searchScope == null)
@@ -194,7 +207,7 @@
         public KnockoutForeachContext<TItem> Foreach<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
         {
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
-            var regionContext = new KnockoutForeachContext<TItem>(viewContext, expression);
+            var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(), expression);
             regionContext.WriteStart(viewContext.Writer);
             regionContext.ContextStack = ContextStack;
             ContextStack.Add(regionContext);
@@ -204,7 +217,7 @@
         public KnockoutForeachContext<TItem> ForeachContext<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
         {
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
-            var regionContext = new KnockoutForeachContext<TItem>(viewContext, expression, false);
+            var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(), expression, false);
             regionContext.WriteStart(viewContext.Writer);
             regionContext.ContextStack = ContextStack;
             ContextStack.Add(regionContext);
@@ -214,7 +227,7 @@
         public KnockoutWithContext<TItem> With<TItem>(Expression<Func<TModel, TItem>> binding)
         {
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
-            var regionContext = new KnockoutWithContext<TItem>(viewContext, expression);
+            var regionContext = new KnockoutWithContext<TItem>(this.CreateContext<TItem>(), expression);
             regionContext.WriteStart(viewContext.Writer);
             regionContext.ContextStack = ContextStack;
             ContextStack.Add(regionContext);
@@ -223,7 +236,7 @@
 
         public KnockoutIfContext<TModel> If(Expression<Func<TModel, bool>> binding)
         {
-            var regionContext = new KnockoutIfContext<TModel>(viewContext, KnockoutExpressionConverter.Convert(binding));
+            var regionContext = new KnockoutIfContext<TModel>(this, KnockoutExpressionConverter.Convert(binding));
             regionContext.InStack = false;
             regionContext.WriteStart(viewContext.Writer);
             return regionContext;
@@ -286,7 +299,19 @@
             }
         }
 
+        public MvcHtmlString FormServerAction(string actionName, string controllerName, object routeValues = null,
+            string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null, string successOverride = null)
+        {
+            return ServerActionImpl(true, actionName, controllerName, routeValues, bindingOut, bindingIn, settings, successOverride);
+        }
+
         public MvcHtmlString ServerAction(string actionName, string controllerName, object routeValues = null,
+            string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null, string successOverride = null)
+        {
+            return ServerActionImpl(false, actionName, controllerName, routeValues, bindingOut, bindingIn, settings, successOverride);
+        }
+
+        public MvcHtmlString ServerActionImpl(bool isForm, string actionName, string controllerName, object routeValues = null,
             string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null, string successOverride = null)
         {
             bool settingsProvided = settings != null;
@@ -297,7 +322,15 @@
 
             string url = this.GetActionUrl(actionName, controllerName, routeValues);
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? ViewModelName, url);
+            if (isForm)
+            {
+                sb.AppendFormat("submitForm(formElement, {0}, '{1}'", bindingOut ?? ViewModelName, url);
+            }
+            else
+            {
+                sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? ViewModelName, url);
+            }
+
             if (bindingIn != null || settingsProvided || successOverride != null)
             {
                 sb.AppendFormat(", {0}, {1}, {2}",
@@ -381,18 +414,18 @@
             return String.Format("var ko_CSRF_Token = \"{0}\";", tokenHtml.Substring(0, tokenHtml.IndexOf('"')));
         }
 
-        protected class ViewDataContainer : IViewDataContainer
-        {
-            public ViewDataDictionary ViewData
-            {
-                get;
-                set;
-            }
+        //protected class ViewDataContainer : IViewDataContainer
+        //{
+        //    public ViewDataDictionary ViewData
+        //    {
+        //        get;
+        //        set;
+        //    }
 
-            public ViewDataContainer(ViewDataDictionary viewData)
-            {
-                this.ViewData = viewData;
-            }
-        }
+        //    public ViewDataContainer(ViewDataDictionary viewData)
+        //    {
+        //        this.ViewData = viewData;
+        //    }
+        //}
     }
 }

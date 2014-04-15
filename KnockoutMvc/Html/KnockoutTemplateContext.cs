@@ -15,7 +15,7 @@
         public KnockoutTemplateContext(
           ViewContext viewContext,
           KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases, string templateId)
-            : base(viewContext)
+            : base(context)
         {
             this.context = context;
             this.instanceNames = instanceNames;

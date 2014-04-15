@@ -4,8 +4,8 @@
 
     public class KnockoutIfContext<TModel> : KnockoutCommonRegionContext<TModel>
     {
-        public KnockoutIfContext(ViewContext viewContext, string expression)
-            : base(viewContext, expression)
+        public KnockoutIfContext(KnockoutContext<TModel> context, string expression)
+            : base(context, expression)
         {
         }
 

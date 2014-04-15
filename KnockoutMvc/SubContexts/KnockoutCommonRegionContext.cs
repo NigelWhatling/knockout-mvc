@@ -7,8 +7,8 @@
     {
         public string Expression { get; set; }
 
-        public KnockoutCommonRegionContext(ViewContext viewContext, string expression)
-            : base(viewContext)
+        public KnockoutCommonRegionContext(KnockoutContext<TModel> context, string expression)
+            : base(context)
         {
             Expression = expression;
         }

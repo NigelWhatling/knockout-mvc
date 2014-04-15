@@ -4,8 +4,8 @@
 
     public class KnockoutWithContext<TModel> : KnockoutCommonRegionContext<TModel>
     {
-        public KnockoutWithContext(ViewContext viewContext, string expression)
-            : base(viewContext, expression)
+        public KnockoutWithContext(KnockoutContext<TModel> context, string expression)
+            : base(context, expression)
         {
         }
 
