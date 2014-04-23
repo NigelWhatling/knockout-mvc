@@ -322,6 +322,8 @@
 
             string url = this.GetActionUrl(actionName, controllerName, routeValues);
             StringBuilder sb = new StringBuilder();
+            sb.Append(this.ViewModelName + ".");
+
             if (isForm)
             {
                 sb.AppendFormat("submitForm(formElement, {0}, '{1}'", bindingOut ?? ViewModelName, url);
