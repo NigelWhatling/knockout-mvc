@@ -43,7 +43,7 @@
         {
         }
 
-        public KnockoutContext(HtmlHelper<TModel> htmlHelper)
+        public KnockoutContext(HtmlHelper htmlHelper)
         {
             this.htmlHelper = htmlHelper;
             this.viewContext = htmlHelper.ViewContext;
@@ -51,7 +51,7 @@
             this.UseAntiForgeryToken = true;
         }
 
-        public KnockoutContext(HtmlHelper<TModel> htmlHelper, string modelName)
+        public KnockoutContext(HtmlHelper htmlHelper, string modelName)
             : this(htmlHelper)
         {
             this.ViewModelName = modelName;
@@ -59,16 +59,16 @@
 
         public KnockoutContext<TModel2> CreateContext<TModel2>()
         {
-            return new KnockoutContext<TModel2>(new HtmlHelper<TModel2>(this.viewContext, this.htmlHelper.ViewDataContainer, this.htmlHelper.RouteCollection));
+            return new KnockoutContext<TModel2>(this.htmlHelper);
         }
 
         public KnockoutContext<TModel2> CreateContext<TModel2>(string modelName)
         {
-            return new KnockoutContext<TModel2>(new HtmlHelper<TModel2>(this.viewContext, this.htmlHelper.ViewDataContainer, this.htmlHelper.RouteCollection), modelName);
+            return new KnockoutContext<TModel2>(this.htmlHelper, modelName);
         }
 
         private readonly ViewContext viewContext;
-        internal readonly HtmlHelper<TModel> htmlHelper;
+        internal readonly HtmlHelper htmlHelper;
 
         private bool isInitialized;
 

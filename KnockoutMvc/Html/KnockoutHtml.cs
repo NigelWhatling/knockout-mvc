@@ -27,7 +27,8 @@
             tagBuilder.ApplyAttributes(new { id = name, name = name });
 
             // Add unobtrusive validation attributes
-            ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(text, this.Context.htmlHelper.ViewData);
+            //ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(text, this.Context.htmlHelper.ViewData);
+            ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
             IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
             tagBuilder.ApplyAttributes(validationAttributes);
 
