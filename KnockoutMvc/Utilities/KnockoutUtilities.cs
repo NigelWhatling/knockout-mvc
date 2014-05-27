@@ -23,10 +23,32 @@
                 return;
             if (type.IsClass && type.Namespace.Equals("System.Data.Entity.DynamicProxies"))
                 type = type.BaseType;
+            bool isDataContract = type.GetCustomAttributes<System.Runtime.Serialization.DataContractAttribute>().Count() > 0;
             foreach (var property in type.GetProperties())
             {
-                if (property.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Length > 0)
+                if (isDataContract && property.GetCustomAttributes<System.Runtime.Serialization.DataMemberAttribute>().Count() == 0)
+                {
                     continue;
+                }
+                
+                bool isDataMember = true;
+                foreach (object attribute in property.GetCustomAttributes(false))
+                {
+                    if (attribute is System.Runtime.Serialization.IgnoreDataMemberAttribute ||
+                        attribute is Newtonsoft.Json.JsonIgnoreAttribute)
+                    {
+                        isDataMember = false;
+                        break;
+                    }
+                }
+
+                if (!isDataMember)
+                {
+                    continue;
+                }
+
+                //if (property.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Length > 0)
+                //    continue;
                 if (property.GetGetMethod() == null)
                     continue;
                 if (property.GetGetMethod().GetParameters().Length > 0)

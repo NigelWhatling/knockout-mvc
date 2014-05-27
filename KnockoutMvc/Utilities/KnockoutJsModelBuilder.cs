@@ -19,8 +19,12 @@
         {
             var sb = new StringBuilder();
             if (modelType.IsClass && modelType.Namespace.Equals("System.Data.Entity.DynamicProxies"))
+            {
                 modelType = modelType.BaseType;
+            }
+
             foreach (var property in modelType.GetProperties())
+            {
                 if (property.GetCustomAttributes(typeof(ComputedAttribute), false).Any())
                 {
                     sb.Append(modelName);
@@ -32,13 +36,36 @@
                     sb.Append(string.Format("}} catch(e) {{ return null; }}  ;}}, {0});", modelName));
                     sb.AppendLine();
                 }
+            }
 
+            bool isDataContract = modelType.GetCustomAttributes<System.Runtime.Serialization.DataContractAttribute>().Count() > 0;
             foreach (var property in modelType.GetProperties())
             {
+                if (isDataContract && property.GetCustomAttributes<System.Runtime.Serialization.DataMemberAttribute>().Count() == 0)
+                {
+                    continue;
+                }
+
                 if (property.PropertyType.IsClass && !typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
                 {
-                    if (property.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Length > 0)
+                    bool isDataMember = true;
+                    foreach (object attribute in property.GetCustomAttributes(false))
+                    {
+                        if (attribute is System.Runtime.Serialization.IgnoreDataMemberAttribute ||
+                            attribute is Newtonsoft.Json.JsonIgnoreAttribute)
+                        {
+                            isDataMember = false;
+                            break;
+                        }
+                    }
+
+                    if (!isDataMember)
+                    {
                         continue;
+                    }
+
+                    //if (property.GetCustomAttributes(typeof(Newtonsoft.Json.JsonIgnoreAttribute), false).Length > 0)
+                    //    continue;
                     object value;
                     try
                     {
