@@ -23,14 +23,17 @@
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "input", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
 
-            string name = ExpressionHelper.GetExpressionText(text);
-            tagBuilder.ApplyAttributes(new { id = name, name = name });
+            if (text != null)
+            {
+                string name = ExpressionHelper.GetExpressionText(text);
+                tagBuilder.ApplyAttributes(new { id = name, name = name });
 
-            // Add unobtrusive validation attributes
-            //ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(text, this.Context.htmlHelper.ViewData);
-            ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
-            IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
-            tagBuilder.ApplyAttributes(validationAttributes);
+                // Add unobtrusive validation attributes
+                //ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(text, this.Context.htmlHelper.ViewData);
+                ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
+                IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
+                tagBuilder.ApplyAttributes(validationAttributes);
+            }
 
             if (!string.IsNullOrWhiteSpace(type))
             {
