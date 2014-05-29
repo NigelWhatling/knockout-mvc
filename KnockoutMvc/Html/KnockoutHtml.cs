@@ -25,7 +25,7 @@
 
             if (text != null)
             {
-                string name = ExpressionHelper.GetExpressionText(text);
+                string name = TagBuilder.CreateSanitizedId(ExpressionHelper.GetExpressionText(text));
                 tagBuilder.ApplyAttributes(new { id = name, name = name });
 
                 // Add unobtrusive validation attributes
@@ -43,6 +43,21 @@
             if (text != null)
             {
                 tagBuilder.Value(text);
+            }
+
+            tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
+            return tagBuilder;
+        }
+
+        public KnockoutTagBuilder<TModel> Label(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        {
+            var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "label", this.InstanceNames, this.Aliases);
+            tagBuilder.ApplyAttributes(htmlAttributes);
+
+            if (text != null)
+            {
+                string name = ExpressionHelper.GetExpressionText(text);
+                tagBuilder.ApplyAttributes(new { @for = name });
             }
 
             tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
