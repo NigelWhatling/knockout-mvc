@@ -270,7 +270,7 @@
         {
             var formContext = new KnockoutFormContext<TModel>(
               viewContext,
-              Context, InstanceNames, Aliases,
+              this.Context, this.InstanceNames, this.Aliases,
               actionName, controllerName, routeValues, htmlAttributes);
             formContext.WriteStart(viewContext.Writer);
             return formContext;

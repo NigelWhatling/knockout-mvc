@@ -1,5 +1,6 @@
 ﻿namespace KnockoutMvc
 {
+    using System;
     using System.Collections.Generic;
     using System.Web.Mvc;
 
@@ -23,7 +24,7 @@
         {
             if (htmlAttributes != null)
                 foreach (var htmlAttribute in htmlAttributes)
-                    tagBuilder.Attributes[htmlAttribute.Key] = htmlAttribute.Value.ToString();
+                    tagBuilder.Attributes[htmlAttribute.Key] = Convert.ToString(htmlAttribute.Value);
         }
 
         public string InnerHtml

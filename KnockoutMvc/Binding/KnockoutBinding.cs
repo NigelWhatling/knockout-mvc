@@ -222,7 +222,7 @@
             
             if (eventName == "submit")
             {
-                sb.Append("function(formElement) { ");
+                sb.Append("function(form) { ");
                 sb.Append(Context.FormServerAction(actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, settings: settings));
             }
             else
@@ -231,7 +231,7 @@
                 sb.Append(Context.ServerAction(actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, settings: settings));
             }
 
-            sb.Append("; }");
+            sb.Append(" }");
             Items.Add(new KnockoutBindingStringItem(eventName, sb.ToString(), false));
             return this;
         }

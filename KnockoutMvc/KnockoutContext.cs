@@ -326,11 +326,11 @@
 
             if (isForm)
             {
-                sb.AppendFormat("submitForm(formElement, {0}, '{1}'", bindingOut ?? ViewModelName, url);
+                sb.AppendFormat("submitForm(form, {0}, '{1}'", bindingOut ?? this.ViewModelName, url);
             }
             else
             {
-                sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? ViewModelName, url);
+                sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? this.ViewModelName, url);
             }
 
             if (bindingIn != null || settingsProvided || successOverride != null)
