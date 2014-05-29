@@ -64,17 +64,27 @@
             return Input(text, "hidden", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> RadioButton(Expression<Func<TModel, object>> @checked, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> RadioButton(Expression<Func<TModel, object>> @checked, object htmlAttributes = null, object checkedValue = null)
         {
             var tagBuilder = Input(null, "radio", htmlAttributes);
             tagBuilder.Checked(@checked);
+            if (checkedValue != null)
+            {
+                tagBuilder.CheckedValue(Convert.ToString(checkedValue));
+            }
+
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> CheckBox(Expression<Func<TModel, object>> @checked, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> CheckBox(Expression<Func<TModel, object>> @checked, object htmlAttributes = null, object checkedValue = null)
         {
             var tagBuilder = Input(null, "checkbox", htmlAttributes);
             tagBuilder.Checked(@checked);
+            if (checkedValue != null)
+            {
+                tagBuilder.CheckedValue(Convert.ToString(checkedValue));
+            }
+
             return tagBuilder;
         }
 
@@ -106,7 +116,7 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null)
+        public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null, Expression<Func<TItem, object>> optionsValue = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "select", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
@@ -117,8 +127,14 @@
                 var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
                 tagBuilder.OptionsText("function(item) { return " + KnockoutExpressionConverter.Convert(optionsText, data) + "; }");
             }
+            if (optionsValue != null)
+            {
+                var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
+                tagBuilder.OptionsValue("function(item) { return " + KnockoutExpressionConverter.Convert(optionsValue, data) + "; }");
+            }
             return tagBuilder;
         }
+
         public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, string OptionsTextValue = null, string OptionsIdValue = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "select", InstanceNames, Aliases);
@@ -201,6 +217,17 @@
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "button", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
             tagBuilder.Click(actionName, controllerName, routeValues, bindingOut: noData ? "null" : null);
+            tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
+            return tagBuilder;
+        }
+
+        public KnockoutTagBuilder<TModel> Button(Expression<Func<TModel, object>> binding, string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        {
+            string modelOut = binding == null ? "null" : this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
+            string modelIn = bindingIn == null ? null : KnockoutExpressionConverter.Convert(bindingIn, CreateData());
+            var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "button", InstanceNames, Aliases);
+            tagBuilder.ApplyAttributes(htmlAttributes);
+            tagBuilder.Click(actionName, controllerName, routeValues, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
             tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
             return tagBuilder;
         }

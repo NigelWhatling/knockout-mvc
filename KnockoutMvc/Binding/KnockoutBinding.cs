@@ -98,6 +98,18 @@
             return this;
         }
 
+        public KnockoutBinding<TModel> CheckedValue(Expression<Func<TModel, object>> binding)
+        {
+            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "checkedValue", Expression = binding });
+            return this;
+        }
+
+        public KnockoutBinding<TModel> CheckedValue(string text, bool isWord = false)
+        {
+            Items.Add(new KnockoutBindingStringItem("checkedValue", text, isWord));
+            return this;
+        }
+
         public KnockoutBinding<TModel> Options(Expression<Func<TModel, IEnumerable>> binding)
         {
             Items.Add(new KnockoutBindingItem<TModel, IEnumerable> { Name = "options", Expression = binding });
