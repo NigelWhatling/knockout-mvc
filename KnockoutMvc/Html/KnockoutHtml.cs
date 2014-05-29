@@ -264,30 +264,32 @@
         public KnockoutFormContext<TModel> Form(Expression<Func<TModel, object>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
           Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
         {
-            string modelOut = KnockoutExpressionConverter.Convert(binding, CreateData());
+            string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
             string modelIn = bindingIn == null ? null : KnockoutExpressionConverter.Convert(bindingIn, CreateData());
             var formContext = new KnockoutFormContext<TModel>(
               viewContext,
-              this.Context.CreateContext<TModel>(modelOut),
-              InstanceNames, Aliases,
+              this.Context, //this.Context.CreateContext<TModel>(modelOut),
+              this.InstanceNames, this.Aliases,
               actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
             formContext.WriteStart(viewContext.Writer);
             return formContext;
         }
 
+        /*
         public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
             Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
         {
-            string modelOut = KnockoutExpressionConverter.Convert(binding, CreateData());
+            string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
             string modelIn = bindingIn != null ? KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
             var formContext = new KnockoutFormContext<TSubModel>(
               viewContext,
               this.Context.CreateContext<TSubModel>(modelOut),
-              InstanceNames, Aliases,
+              this.InstanceNames, this.Aliases,
               actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
             formContext.WriteStart(viewContext.Writer);
             return formContext;
         }
+        */
 
         public KnockoutTemplateContext<TModel> Template(Expression<Func<TModel, object>> binding, string templateId)
         {
