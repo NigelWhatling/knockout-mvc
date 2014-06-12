@@ -18,7 +18,7 @@
             this.viewContext = viewContext;
         }
 
-        private KnockoutTagBuilder<TModel> Input(Expression<Func<TModel, object>> expression, string type, object htmlAttributes = null)
+        private KnockoutTagBuilder<TModel> Input<TProperty>(Expression<Func<TModel, TProperty>> expression, string type, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "input", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
@@ -37,7 +37,7 @@
                 }
 
                 // Add unobtrusive validation attributes
-                ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(expression, this.Context.htmlHelper.ViewData);
+                ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.htmlHelper.ViewData);
                 //ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
                 IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
                 tagBuilder.ApplyAttributes(validationAttributes);
@@ -57,7 +57,7 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> Label(Expression<Func<TModel, object>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Label<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "label", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
@@ -76,7 +76,7 @@
 
                 if (expression.NodeType == ExpressionType.Convert || expression.NodeType == ExpressionType.ConvertChecked)
                 {
-                    expression = Expression.MakeMemberAccess();
+                    //expression = Expression.MakeMemberAccess();
                 }
 
                 ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.htmlHelper.ViewData);
@@ -125,25 +125,25 @@
             return str;
         }
 
-        public KnockoutTagBuilder<TModel> TextBox(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> TextBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(text, "text", htmlAttributes);
+            return Input(expression, "text", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> Password(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Password<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(text, "password", htmlAttributes);
+            return Input(expression, "password", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> Hidden(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Hidden<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(text, "hidden", htmlAttributes);
+            return Input(expression, "hidden", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> RadioButton(Expression<Func<TModel, object>> @checked, object htmlAttributes = null, object checkedValue = null)
+        public KnockoutTagBuilder<TModel> RadioButton<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, object checkedValue = null)
         {
-            var tagBuilder = Input(null, "radio", htmlAttributes);
-            tagBuilder.Checked(@checked);
+            var tagBuilder = this.Input<TProperty>(null, "radio", htmlAttributes);
+            tagBuilder.Checked(expression);
             if (checkedValue != null)
             {
                 tagBuilder.CheckedValue(Convert.ToString(checkedValue));
@@ -152,10 +152,10 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> CheckBox(Expression<Func<TModel, object>> @checked, object htmlAttributes = null, object checkedValue = null)
+        public KnockoutTagBuilder<TModel> CheckBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, object checkedValue = null)
         {
-            var tagBuilder = Input(null, "checkbox", htmlAttributes);
-            tagBuilder.Checked(@checked);
+            var tagBuilder = this.Input<TProperty>(null, "checkbox", htmlAttributes);
+            tagBuilder.Checked(expression);
             if (checkedValue != null)
             {
                 tagBuilder.CheckedValue(Convert.ToString(checkedValue));
@@ -164,31 +164,31 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> Date(Expression<Func<TModel, object>> date, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Date<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(date, "date", htmlAttributes);
+            return Input(expression, "date", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> Email(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Email<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(text, "email", htmlAttributes);
+            return Input(expression, "email", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> File(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> File<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(text, "file", htmlAttributes);
+            return Input(expression, "file", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> Url(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Url<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
-            return Input(text, "url", htmlAttributes);
+            return Input(expression, "url", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> TextArea(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> TextArea<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "textarea", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            tagBuilder.Value(text);
+            tagBuilder.Value(expression);
             return tagBuilder;
         }
 
@@ -264,11 +264,11 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> Span(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Span<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "span", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            tagBuilder.Text(text);
+            tagBuilder.Text(expression);
             return tagBuilder;
         }
 
@@ -297,7 +297,7 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> Button(Expression<Func<TModel, object>> binding, string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        public KnockoutTagBuilder<TModel> Button<TProperty>(Expression<Func<TModel, TProperty>> binding, string caption, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
         {
             string modelOut = binding == null ? "null" : this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
             string modelIn = bindingIn == null ? null : KnockoutExpressionConverter.Convert(bindingIn, CreateData());
@@ -336,7 +336,7 @@
             return formContext;
         }
 
-        public KnockoutFormContext<TModel> Form(Expression<Func<TModel, object>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        public KnockoutFormContext<TModel> Form<TProperty>(Expression<Func<TModel, TProperty>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
         {
             string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
             string modelIn = bindingIn == null ? null : KnockoutExpressionConverter.Convert(bindingIn, CreateData());
@@ -361,7 +361,7 @@
             return formContext;
         }
 
-        public KnockoutTemplateContext<TModel> Template(Expression<Func<TModel, object>> binding, string templateId)
+        public KnockoutTemplateContext<TModel> Template<TProperty>(Expression<Func<TModel, TProperty>> expression, string templateId)
         {
             var templateContext = new KnockoutTemplateContext<TModel>(
               viewContext,

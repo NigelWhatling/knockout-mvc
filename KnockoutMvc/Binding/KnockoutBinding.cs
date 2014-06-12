@@ -17,9 +17,9 @@
         // *** Controlling text and appearance ***
 
         // Visible
-        public KnockoutBinding<TModel> Visible(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Visible<TProperty>(Expression<Func<TModel, TProperty>> expression)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "visible", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "visible", Expression = expression });
             return this;
         }
 
@@ -30,9 +30,9 @@
         }
 
         // Text
-        public KnockoutBinding<TModel> Text(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Text<TProperty>(Expression<Func<TModel, TProperty>> expression)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "text", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "text", Expression = expression });
             return this;
         }
 
@@ -56,9 +56,9 @@
         }
 
         // *** Working with form fields ***
-        public KnockoutBinding<TModel> Value(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Value<TProperty>(Expression<Func<TModel, TProperty>> expression)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "value", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "value", Expression = expression });
             return this;
         }
 
@@ -92,9 +92,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> Checked(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Checked<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "checked", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "checked", Expression = binding });
             return this;
         }
 
@@ -104,9 +104,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> CheckedValue(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> CheckedValue<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "checkedValue", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "checkedValue", Expression = binding });
             return this;
         }
 
@@ -140,9 +140,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> OptionsCaption(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> OptionsCaption<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "optionsCaption", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "optionsCaption", Expression = binding });
             return this;
         }
 
@@ -152,9 +152,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> OptionsText(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> OptionsText<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "optionsText", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "optionsText", Expression = binding });
             return this;
         }
 
@@ -164,9 +164,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> OptionsValue(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> OptionsValue<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "optionsValue", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "optionsValue", Expression = binding });
             return this;
         }
 
@@ -194,28 +194,28 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> HasFocus(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> HasFocus<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "hasfocus", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "hasfocus", Expression = binding });
             return this;
         }
 
         // *** Complex ***
-        public KnockoutBinding<TModel> Css(string name, Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Css<TProperty>(string name, Expression<Func<TModel, TProperty>> binding)
         {
-            ComplexItem("css").Add(new KnockoutBindingItem<TModel, object> { Name = name, Expression = binding });
+            ComplexItem("css").Add(new KnockoutBindingItem<TModel, TProperty> { Name = name, Expression = binding });
             return this;
         }
 
-        public KnockoutBinding<TModel> Style(string name, Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Style<TProperty>(string name, Expression<Func<TModel, TProperty>> binding)
         {
-            ComplexItem("style").Add(new KnockoutBindingItem<TModel, object> { Name = name, Expression = binding });
+            ComplexItem("style").Add(new KnockoutBindingItem<TModel, TProperty> { Name = name, Expression = binding });
             return this;
         }
 
-        public KnockoutBinding<TModel> Attr(string name, Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> Attr<TProperty>(string name, Expression<Func<TModel, TProperty>> binding)
         {
-            ComplexItem("attr").Add(new KnockoutBindingItem<TModel, object> { Name = name, Expression = binding });
+            ComplexItem("attr").Add(new KnockoutBindingItem<TModel, TProperty> { Name = name, Expression = binding });
             return this;
         }
 
@@ -270,9 +270,9 @@
 
         // *** Flow Control *** 
 
-        public KnockoutBinding<TModel> ForEach(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> ForEach<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "foreach", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "foreach", Expression = binding });
             return this;
         }
 
@@ -294,9 +294,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> If(Expression<Func<TModel, object>> binding)
+        public KnockoutBinding<TModel> If<TProperty>(Expression<Func<TModel, TProperty>> binding)
         {
-            Items.Add(new KnockoutBindingItem<TModel, object> { Name = "if", Expression = binding });
+            Items.Add(new KnockoutBindingItem<TModel, TProperty> { Name = "if", Expression = binding });
             return this;
         }
 
