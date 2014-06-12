@@ -3,7 +3,12 @@
     using System.IO;
     using System.Web.Mvc;
 
-    public abstract class KnockoutCommonRegionContext<TModel> : KnockoutRegionContext<TModel>
+    public interface IKnockoutCommonRegionContext
+    {
+        string Expression { get; set; }
+    }
+
+    public abstract class KnockoutCommonRegionContext<TModel> : KnockoutRegionContext<TModel>, IKnockoutCommonRegionContext
     {
         public string Expression { get; set; }
 

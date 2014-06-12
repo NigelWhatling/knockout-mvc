@@ -14,14 +14,14 @@
         private readonly string controllerName;
         private readonly object routeValues;
         private readonly object htmlAttributes;
+        private readonly string withBinding;
         private readonly string bindingOut;
         private readonly string bindingIn;
         private readonly KnockoutExecuteSettings settings;
 
         public KnockoutFormContext(
-          ViewContext viewContext,
           KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases,
-          string actionName, string controllerName, object routeValues, object htmlAttributes, string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
+          string actionName, string controllerName, object routeValues, object htmlAttributes, string withBinding = null, string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
             : base(context)
         {
             this.context = context;
@@ -31,6 +31,7 @@
             this.controllerName = controllerName;
             this.routeValues = routeValues;
             this.htmlAttributes = htmlAttributes;
+            this.withBinding = withBinding;
             this.bindingOut = bindingOut;
             this.bindingIn = bindingIn;
             this.settings = settings;
@@ -41,6 +42,11 @@
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(context, "form", instanceNames, aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
+            if (this.withBinding != null)
+            {
+                tagBuilder.Custom("with", this.withBinding);
+            }
+
             tagBuilder.Submit(actionName, controllerName, routeValues, bindingOut: this.bindingOut, bindingIn: this.bindingIn, settings: this.settings);
             tagBuilder.TagRenderMode = TagRenderMode.StartTag;
             writer.WriteLine(tagBuilder.ToHtmlString());

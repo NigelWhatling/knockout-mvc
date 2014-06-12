@@ -29,13 +29,13 @@
         {
             var sb = new StringBuilder();
 
-            sb.Append(Name);
-            sb.Append(": ");
+            sb.Append(this.SafeName);
+            sb.Append(" : ");
             if (NeedQuotes)
-                sb.Append('\'');
+                sb.Append("\'");
             sb.Append(Value);
             if (NeedQuotes)
-                sb.Append('\'');
+                sb.Append("\'");
 
             return sb.ToString();
         }

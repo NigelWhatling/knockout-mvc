@@ -21,15 +21,15 @@
         {
             var sb = new StringBuilder();
 
-            sb.Append(Name);
-            sb.Append(" : {");
+            sb.Append(this.SafeName);
+            sb.Append(" : { ");
             for (int i = 0; i < subItems.Count; i++)
             {
                 if (i != 0)
                     sb.Append(", ");
                 sb.Append(subItems[i].GetKnockoutExpression(data));
             }
-            sb.Append('}');
+            sb.Append(" }");
 
             return sb.ToString();
         }

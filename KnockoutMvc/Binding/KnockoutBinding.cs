@@ -23,6 +23,12 @@
             return this;
         }
 
+        public KnockoutBinding<TModel> Visible(string binding)
+        {
+            Items.Add(new KnockoutBindingStringItem("visible", binding, false));
+            return this;
+        }
+
         // Text
         public KnockoutBinding<TModel> Text(Expression<Func<TModel, object>> binding)
         {
@@ -170,6 +176,11 @@
             return this;
         }
 
+        public KnockoutBinding<TModel> ValueAllowUnset(bool isAllowed = true)
+        {
+            Items.Add(new KnockoutBindingStringItem("valueAllowUnset", isAllowed.ToString().ToLower(), false));
+            return this;
+        }
 
         public KnockoutBinding<TModel> UniqueName()
         {
@@ -319,9 +330,9 @@
         }
 
         // *** Custom ***    
-        public KnockoutBinding<TModel> Custom(string name, string value)
+        public KnockoutBinding<TModel> Custom(string name, string value, bool isProperty = false)
         {
-            Items.Add(new KnockoutBindingStringItem(name, value));
+            Items.Add(new KnockoutBindingStringItem(name, value, needQuotes: isProperty));
             return this;
         }
 
@@ -351,10 +362,15 @@
 
         public virtual string ToHtmlString()
         {
+            if (this.Items.Count == 0)
+            {
+                return String.Empty;
+            }
+
             var sb = new StringBuilder();
-            sb.Append(@"data-bind=""");
-            sb.Append(BindingAttributeContent());
-            sb.Append(@"""");
+            sb.Append("data-bind=\"");
+            sb.Append(this.BindingAttributeContent());
+            sb.Append("\"");
             return sb.ToString();
         }
 

@@ -222,6 +222,12 @@
         {
             if (lambdaFrom.Contains(p.Name))
                 return data.InstanceNames[lambdaFrom.IndexOf(p.Name)];
+            //if (lambdaFrom.Contains(p.Name))
+            //{
+            //    string name = data.InstanceNames[lambdaFrom.IndexOf(p.Name)];
+            //    return String.IsNullOrEmpty(name) ? "$data" : name;
+            //}
+
             return p.Name;
         }
 
@@ -258,7 +264,16 @@
                 return obj;
             }
             if (typeof(Expression).IsAssignableFrom(m.Method.ReturnType))
+            {
                 return VisitMemberAccess(m.Object, m.Method.Name);
+            }
+
+            //if (((MemberExpression)m.Object).Member.Name == "Model")
+            //{
+            //    List<string> args = m.Arguments.ToList().ConvertAll<string>(a => { return this.Visit(a); });
+            //    return String.Format("$root.{0}({1})", m.Method.Name, String.Join(", ", args));
+            //}
+
             throw new NotSupportedException();
         }
 

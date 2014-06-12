@@ -2,7 +2,11 @@
 {
     using System.Web.Mvc;
 
-    public class KnockoutForeachContext<TModel> : KnockoutCommonRegionContext<TModel>
+    public interface IKnockoutForeachContext
+    {
+    }
+
+    public class KnockoutForeachContext<TModel> : KnockoutCommonRegionContext<TModel>, IKnockoutForeachContext
     {
         private bool useVirtualElement;
 

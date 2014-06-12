@@ -18,19 +18,27 @@
             this.viewContext = viewContext;
         }
 
-        private KnockoutTagBuilder<TModel> Input(Expression<Func<TModel, object>> text, string type, object htmlAttributes = null)
+        private KnockoutTagBuilder<TModel> Input(Expression<Func<TModel, object>> expression, string type, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "input", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
 
-            if (text != null)
+            if (expression != null)
             {
-                string name = TagBuilder.CreateSanitizedId(ExpressionHelper.GetExpressionText(text));
-                tagBuilder.ApplyAttributes(new { id = name, name = name });
+                string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
+                if (this.GetFieldName(name).Contains("$index()"))
+                {
+                    tagBuilder.Attr("id", this.GetSanitisedFieldName(name));
+                    tagBuilder.Attr("name", this.GetFieldName(name));
+                }
+                else
+                {
+                    tagBuilder.ApplyAttributes(new { id = this.GetSanitisedFieldName(name), name = this.GetFieldName(name) });
+                }
 
                 // Add unobtrusive validation attributes
-                //ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(text, this.Context.htmlHelper.ViewData);
-                ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
+                ModelMetadata metadata = ModelMetadata.FromLambdaExpression<TModel, object>(expression, this.Context.htmlHelper.ViewData);
+                //ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
                 IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
                 tagBuilder.ApplyAttributes(validationAttributes);
             }
@@ -40,28 +48,81 @@
                 tagBuilder.ApplyAttributes(new { type });
             }
 
-            if (text != null)
+            if (expression != null)
             {
-                tagBuilder.Value(text);
+                tagBuilder.Value(expression);
             }
 
             tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> Label(Expression<Func<TModel, object>> text, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Label(Expression<Func<TModel, object>> expression, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "label", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
 
-            if (text != null)
+            if (expression != null)
             {
-                string name = ExpressionHelper.GetExpressionText(text);
-                tagBuilder.ApplyAttributes(new { @for = name });
+                string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
+                if (this.GetFieldName(name).Contains("$index()"))
+                {
+                    tagBuilder.Attr("for", this.GetSanitisedFieldName(name));
+                }
+                else
+                {
+                    tagBuilder.ApplyAttribute("for", this.GetSanitisedFieldName(name));
+                }
+
+                if (expression.NodeType == ExpressionType.Convert || expression.NodeType == ExpressionType.ConvertChecked)
+                {
+                    expression = Expression.MakeMemberAccess();
+                }
+
+                ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.htmlHelper.ViewData);
+                tagBuilder.SetInnerText(metadata.DisplayName ?? metadata.PropertyName);
             }
 
-            tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
             return tagBuilder;
+        }
+
+        public KnockoutTagBuilder<TModel> ValidationMessage<TProperty>(Expression<Func<TModel, TProperty>> expression, string validationMessage = null, object htmlAttributes = null)
+        {
+            string generatedTag = System.Web.Mvc.Html.ValidationExtensions.ValidationMessageFor(this.Context.htmlHelper, expression, validationMessage, htmlAttributes).ToHtmlString();
+            var tagBuilder = KnockoutTagBuilder<TModel>.CreateFromHtml(this.Context, generatedTag, this.InstanceNames, this.Aliases);
+            
+            if (expression != null)
+            {
+                string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
+                if (this.GetFieldName(name).Contains("$index()"))
+                {
+                    tagBuilder.Attr("data-valmsg-for", this.GetFieldName(name));
+                    tagBuilder.RemoveAttribute("data-valmsg-for");
+                }
+                else
+                {
+                    tagBuilder.ApplyAttribute("data-valmsg-for", this.GetFieldName(name));
+                }
+            }
+
+            return tagBuilder;
+        }
+
+
+        private string GetFieldName(string name)
+        {
+            return (this.Context.ExpressionTree + "." + name).TrimStart('.').Replace("[]", "['+$index()+']");
+        }
+
+        private string GetSanitisedFieldName(string name)
+        {
+            string str = TagBuilder.CreateSanitizedId((this.Context.ExpressionTree + "." + name).TrimStart('.').Replace("[]", ":_index_:"));
+            if (!String.IsNullOrWhiteSpace(str))
+            {
+                str = str.Replace(":_index_:", "_'+$index()+'_");
+            }
+
+            return str;
         }
 
         public KnockoutTagBuilder<TModel> TextBox(Expression<Func<TModel, object>> text, object htmlAttributes = null)
@@ -269,20 +330,17 @@
         public KnockoutFormContext<TModel> Form(string actionName, string controllerName, object routeValues = null, object htmlAttributes = null)
         {
             var formContext = new KnockoutFormContext<TModel>(
-              viewContext,
               this.Context, this.InstanceNames, this.Aliases,
               actionName, controllerName, routeValues, htmlAttributes);
             formContext.WriteStart(viewContext.Writer);
             return formContext;
         }
 
-        public KnockoutFormContext<TModel> Form(Expression<Func<TModel, object>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
-          Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        public KnockoutFormContext<TModel> Form(Expression<Func<TModel, object>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, object>> bindingIn = null, KnockoutExecuteSettings settings = null)
         {
             string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
             string modelIn = bindingIn == null ? null : KnockoutExpressionConverter.Convert(bindingIn, CreateData());
             var formContext = new KnockoutFormContext<TModel>(
-              viewContext,
               this.Context, //this.Context.CreateContext<TModel>(modelOut),
               this.InstanceNames, this.Aliases,
               actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
@@ -290,21 +348,18 @@
             return formContext;
         }
 
-        /*
-        public KnockoutFormContext<TSubModel> Form<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null,
-            Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        public KnockoutFormContext<TSubModel> FormWith<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
         {
-            string modelOut = this.Context.ViewModelName + "." + KnockoutExpressionConverter.Convert(binding, CreateData());
+            string bindingName = KnockoutExpressionConverter.Convert(binding, CreateData());
+            string modelOut = this.Context.ViewModelName + "." + bindingName;
             string modelIn = bindingIn != null ? KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
             var formContext = new KnockoutFormContext<TSubModel>(
-              viewContext,
-              this.Context.CreateContext<TSubModel>(modelOut),
+              this.Context.CreateContext<TSubModel>(model => binding.Compile().Invoke(model)),
               this.InstanceNames, this.Aliases,
-              actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
+              actionName, controllerName, routeValues, htmlAttributes, withBinding: bindingName, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
             formContext.WriteStart(viewContext.Writer);
             return formContext;
         }
-        */
 
         public KnockoutTemplateContext<TModel> Template(Expression<Func<TModel, object>> binding, string templateId)
         {

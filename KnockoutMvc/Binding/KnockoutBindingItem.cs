@@ -8,6 +8,21 @@
     {
         public string Name { get; set; }
 
+        protected string SafeName
+        {
+            get
+            {
+                if (this.Name.IndexOf('-') > 0)
+                {
+                    return "'" + this.Name + "'";
+                }
+                else
+                {
+                    return this.Name;
+                }
+            }
+        }
+
         public abstract string GetKnockoutExpression(KnockoutExpressionData data);
 
         public virtual bool IsValid()
@@ -28,7 +43,7 @@
 
             var sb = new StringBuilder();
 
-            sb.Append(Name);
+            sb.Append(this.SafeName);
             sb.Append(" : ");
             sb.Append(value);
 
