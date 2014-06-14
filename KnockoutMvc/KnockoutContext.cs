@@ -14,6 +14,7 @@
     {
         string GetInstanceName();
         string GetIndex();
+        KnockoutExpressionData CreateData();
     }
 
     public class KnockoutContext<TModel> : IKnockoutContext
@@ -39,13 +40,13 @@
         protected List<IKnockoutContext> ContextStack { get; set; }
 
         public KnockoutContext(KnockoutContext<TModel> context)
-            : this(context.htmlHelper)
+            : this(context.HtmlHelper)
         {
         }
 
         public KnockoutContext(HtmlHelper<TModel> htmlHelper)
         {
-            this.htmlHelper = htmlHelper;
+            this._HtmlHelper = htmlHelper;
             this.viewContext = htmlHelper.ViewContext;
             this.ContextStack = new List<IKnockoutContext>();
             this.UseAntiForgeryToken = true;
@@ -59,17 +60,17 @@
 
         public KnockoutContext<TModel2> CreateContext<TModel2>(Func<TModel, TModel2> modelFunc)
         {
-            //return new KnockoutContext<TModel2>(this.htmlHelper);
+            ViewContext currentViewContext = this.HtmlHelper.ViewContext;
+            TModel2 model = modelFunc.Invoke((TModel)this.HtmlHelper.ViewDataContainer.ViewData.Model);
 
-            TModel2 model = modelFunc.Invoke((TModel)this.htmlHelper.ViewDataContainer.ViewData.Model);
             ViewContext context = new ViewContext(
-                    this.htmlHelper.ViewContext,
-                    this.htmlHelper.ViewContext.View,
+                    currentViewContext,
+                    currentViewContext.View,
                     new ViewDataDictionary(model),
-                    this.htmlHelper.ViewContext.TempData,
-                    this.htmlHelper.ViewContext.Writer);
+                    currentViewContext.TempData,
+                    currentViewContext.Writer);
 
-            return new KnockoutContext<TModel2>(new HtmlHelper<TModel2>(context, new MyViewDataContainer<TModel2>(model)));
+            return new KnockoutContext<TModel2>(new HtmlHelper<TModel2>(context, new KnockoutViewDataContainer<TModel2>(model)));
         }
 
         //public KnockoutContext<TModel2> CreateContext<TModel2>(string modelName)
@@ -78,9 +79,17 @@
         //}
 
         private readonly ViewContext viewContext;
-        internal readonly HtmlHelper<TModel> htmlHelper;
+        private readonly HtmlHelper<TModel> _HtmlHelper;
 
         private bool isInitialized;
+
+        internal HtmlHelper<TModel> HtmlHelper
+        {
+            get
+            {
+                return this._HtmlHelper;
+            }
+        }
 
         public string ExpressionTree
         {
@@ -290,6 +299,21 @@
             return regionContext;
         }
 
+        public KnockoutFormContext<TSubModel> FormContext<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        {
+            string bindingName = KnockoutExpressionConverter.Convert(binding, CreateData());
+            string modelOut = this.ViewModelName + "." + bindingName;
+            string modelIn = bindingIn != null ? KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
+            var formContext = new KnockoutFormContext<TSubModel>(
+              this.CreateContext<TSubModel>(model => binding.Compile().Invoke(model)),
+              this.CreateData().InstanceNames, this.CreateData().Aliases,
+              actionName, controllerName, routeValues, htmlAttributes, withBinding: bindingName, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
+            formContext.WriteStart(viewContext.Writer);
+            formContext.ContextStack = this.ContextStack;
+            this.ContextStack.Add(formContext);
+            return formContext;
+        }
+
         public string GetInstanceName()
         {
             switch (ActiveSubcontextCount)
@@ -465,7 +489,7 @@
         }
     }
 
-    public class MyViewDataContainer<TModel> : IViewDataContainer
+    public class KnockoutViewDataContainer<TModel> : IViewDataContainer
     {
         public ViewDataDictionary ViewData
         {
@@ -473,7 +497,7 @@
             set;
         }
 
-        public MyViewDataContainer(TModel model)
+        public KnockoutViewDataContainer(TModel model)
         {
             this.ViewData = new ViewDataDictionary<TModel>(model);
         }

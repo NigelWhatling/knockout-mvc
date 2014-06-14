@@ -5,7 +5,11 @@
     using System.Text;
     using System.Web.Mvc;
 
-    public class KnockoutTagBuilder<TModel> : KnockoutBinding<TModel>
+    public interface IKnockoutTagBuilder
+    {
+    }
+
+    public class KnockoutTagBuilder<TModel> : KnockoutBinding<TModel>, IKnockoutTagBuilder
     {
         private readonly TagBuilder tagBuilder;
 

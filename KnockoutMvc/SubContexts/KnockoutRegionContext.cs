@@ -14,7 +14,7 @@
                 throw new ArgumentNullException("context");
             }
 
-            this.writer = this.htmlHelper.ViewContext.Writer;
+            this.writer = this.HtmlHelper.ViewContext.Writer;
             this.InStack = true;
         }
 

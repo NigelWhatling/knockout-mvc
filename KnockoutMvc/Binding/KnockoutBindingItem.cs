@@ -6,19 +6,46 @@
 
     public abstract class KnockoutBindingItem
     {
+        public IKnockoutContext Context { get; set; }
+
         public string Name { get; set; }
 
         protected string SafeName
         {
             get
             {
-                if (this.Name.IndexOf('-') > 0)
+                string name = this.Name;
+                if (name == null)
                 {
-                    return "'" + this.Name + "'";
+                    return String.Empty;
+                }
+
+                bool isSafe = true;
+                for (int i = 0; i < name.Length; i++)
+                {
+                    char c = name[i];
+                    if (c >= '0' && c <= '9')
+                    {
+                        if (i == 0)
+                        {
+                            isSafe = false;
+                            break;
+                        }
+                    }
+                    else if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '$' || c == '_'))
+                    {
+                        isSafe = false;
+                        break;
+                    }
+                }
+
+                if (isSafe)
+                {
+                    return name;
                 }
                 else
                 {
-                    return this.Name;
+                    return "'" + this.Name + "'";
                 }
             }
         }
@@ -35,9 +62,25 @@
     {
         public Expression<Func<TModel, TResult>> Expression { get; set; }
 
+        public KnockoutBindingItem()
+        {
+        }
+
+        public KnockoutBindingItem(string name, Expression<Func<TModel, TResult>> expression)
+        {
+            this.Name = name;
+            this.Expression = expression;
+        }
+
+        public KnockoutBindingItem(string name, Expression<Func<TModel, TResult>> expression, IKnockoutContext context)
+            : this(name, expression)
+        {
+            this.Context = context;
+        }
+
         public override string GetKnockoutExpression(KnockoutExpressionData data)
         {
-            string value = KnockoutExpressionConverter.Convert(Expression, data);
+            string value = KnockoutExpressionConverter.Convert(this.Expression, data);
             if (string.IsNullOrWhiteSpace(value))
                 value = "$data";
 

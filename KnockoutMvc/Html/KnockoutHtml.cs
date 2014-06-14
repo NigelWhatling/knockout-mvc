@@ -37,9 +37,9 @@
                 }
 
                 // Add unobtrusive validation attributes
-                ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.htmlHelper.ViewData);
+                ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.HtmlHelper.ViewData);
                 //ModelMetadata metadata = ModelMetadata.FromStringExpression(name, this.Context.htmlHelper.ViewData);
-                IDictionary<string, object> validationAttributes = this.Context.htmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
+                IDictionary<string, object> validationAttributes = this.Context.HtmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
                 tagBuilder.ApplyAttributes(validationAttributes);
             }
 
@@ -74,12 +74,7 @@
                     tagBuilder.ApplyAttribute("for", this.GetSanitisedFieldName(name));
                 }
 
-                if (expression.NodeType == ExpressionType.Convert || expression.NodeType == ExpressionType.ConvertChecked)
-                {
-                    //expression = Expression.MakeMemberAccess();
-                }
-
-                ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.htmlHelper.ViewData);
+                ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, this.Context.HtmlHelper.ViewData);
                 tagBuilder.SetInnerText(metadata.DisplayName ?? metadata.PropertyName);
             }
 
@@ -88,7 +83,7 @@
 
         public KnockoutTagBuilder<TModel> ValidationMessage<TProperty>(Expression<Func<TModel, TProperty>> expression, string validationMessage = null, object htmlAttributes = null)
         {
-            string generatedTag = System.Web.Mvc.Html.ValidationExtensions.ValidationMessageFor(this.Context.htmlHelper, expression, validationMessage, htmlAttributes).ToHtmlString();
+            string generatedTag = System.Web.Mvc.Html.ValidationExtensions.ValidationMessageFor(this.Context.HtmlHelper, expression, validationMessage, htmlAttributes).ToHtmlString();
             var tagBuilder = KnockoutTagBuilder<TModel>.CreateFromHtml(this.Context, generatedTag, this.InstanceNames, this.Aliases);
             
             if (expression != null)
@@ -192,12 +187,26 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null, Expression<Func<TItem, object>> optionsValue = null)
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null)
         {
-            var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "select", InstanceNames, Aliases);
+            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            if (options != null)
-                tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
+            return tagBuilder;
+        }
+
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(string customBinding, Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null)
+        {
+            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases, customBinding);
+            tagBuilder.ApplyAttributes(htmlAttributes);
+            return tagBuilder;
+        }
+
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null, Expression<Func<TItem, object>> optionsValue = null)
+        {
+            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases);
+            tagBuilder.ApplyAttributes(htmlAttributes);
+            //if (options != null)
+            //    tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
             if (optionsText != null)
             {
                 var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
@@ -211,12 +220,12 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, string OptionsTextValue = null, string OptionsIdValue = null)
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, string OptionsTextValue = null, string OptionsIdValue = null)
         {
-            var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "select", InstanceNames, Aliases);
+            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            if (options != null)
-                tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
+            //if (options != null)
+            //    tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
             if (!string.IsNullOrEmpty(OptionsTextValue))
             {
                 tagBuilder.OptionsText(OptionsTextValue, true);
@@ -228,41 +237,41 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> ListBox<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null)
+        public KnockoutSelectTagBuilder<TModel, TItem> ListBox<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null)
         {
             var tagBuilder = DropDownList(options, htmlAttributes, optionsText);
             tagBuilder.ApplyAttributes(new { multiple = "multiple" });
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes, Expression<Func<TModel, TItem, object>> optionsText)
-        {
-            var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "select", InstanceNames, Aliases);
-            tagBuilder.ApplyAttributes(htmlAttributes);
-            if (options != null)
-                tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
-            if (optionsText != null)
-            {
-                var data = CreateData();
-                var keys = data.Aliases.Keys.ToList();
-                if (!string.IsNullOrEmpty(Context.GetInstanceName()))
-                    foreach (var key in keys)
-                    {
-                        data.Aliases[Context.GetInstanceName() + "." + key] = data.Aliases[key];
-                        data.Aliases.Remove(key);
-                    }
-                data.InstanceNames = new[] { Context.GetInstanceName(), "item" };
-                tagBuilder.OptionsText("function(item) { return " + KnockoutExpressionConverter.Convert(optionsText, data) + "; }");
-            }
-            return tagBuilder;
-        }
+        //public KnockoutTagBuilder<TModel> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes, Expression<Func<TModel, TItem, object>> optionsText)
+        //{
+        //    var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "select", InstanceNames, Aliases);
+        //    tagBuilder.ApplyAttributes(htmlAttributes);
+        //    if (options != null)
+        //        tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
+        //    if (optionsText != null)
+        //    {
+        //        var data = CreateData();
+        //        var keys = data.Aliases.Keys.ToList();
+        //        if (!string.IsNullOrEmpty(Context.GetInstanceName()))
+        //            foreach (var key in keys)
+        //            {
+        //                data.Aliases[Context.GetInstanceName() + "." + key] = data.Aliases[key];
+        //                data.Aliases.Remove(key);
+        //            }
+        //        data.InstanceNames = new[] { Context.GetInstanceName(), "item" };
+        //        tagBuilder.OptionsText("function(item) { return " + KnockoutExpressionConverter.Convert(optionsText, data) + "; }");
+        //    }
+        //    return tagBuilder;
+        //}
 
-        public KnockoutTagBuilder<TModel> ListBox<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes, Expression<Func<TModel, TItem, object>> optionsText)
-        {
-            var tagBuilder = DropDownList(options, htmlAttributes, optionsText);
-            tagBuilder.ApplyAttributes(new { multiple = "multiple" });
-            return tagBuilder;
-        }
+        //public KnockoutSelectTagBuilder<TModel, TItem> ListBox<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes, Expression<Func<TModel, TItem, object>> optionsText)
+        //{
+        //    var tagBuilder = DropDownList(options, htmlAttributes, optionsText);
+        //    tagBuilder.ApplyAttributes(new { multiple = "multiple" });
+        //    return tagBuilder;
+        //}
 
         public KnockoutTagBuilder<TModel> Span<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
         {
