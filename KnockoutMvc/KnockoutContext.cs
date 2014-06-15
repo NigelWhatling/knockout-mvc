@@ -255,10 +255,8 @@
 
         public KnockoutForeachContext<TItem> Foreach<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
         {
-            Func<TModel, IList<TItem>> func = binding.Compile();
-
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
-            var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(model => { return func.Invoke(model)[0]; }), expression);
+            var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(model => { return default(TItem); }), expression);
             regionContext.WriteStart(viewContext.Writer);
             regionContext.ContextStack = ContextStack;
             ContextStack.Add(regionContext);
@@ -267,11 +265,8 @@
 
         public KnockoutForeachContext<TItem> ForeachContext<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
         {
-            Func<TModel, IList<TItem>> func = binding.Compile();
-
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
-            //var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(), expression, false);
-            var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(model => { return func.Invoke(model)[0]; }), expression, false);
+            var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(model => { return default(TItem); }), expression, false);
             regionContext.WriteStart(viewContext.Writer);
             regionContext.ContextStack = ContextStack;
             ContextStack.Add(regionContext);
