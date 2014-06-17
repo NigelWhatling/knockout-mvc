@@ -1,6 +1,7 @@
 ﻿namespace KnockoutMvc
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -141,22 +142,42 @@
                 var lambda = Expression.Lambda<Func<IKnockoutContext>>(obj);
                 var context = lambda.Compile()();
                 if (member == "Model")
+                {
                     return context.GetInstanceName();
+                }
             }
-            var own = Visit(obj, true);
+
+            //var own = Visit(obj, true);
+            var own = Visit(obj, obj.NodeType == ExpressionType.MemberAccess && obj.Type.GetInterface("IEnumerable") == null);
+
             if (data.Aliases.ContainsKey(own))
+            {
                 own = data.Aliases[own];
+            }
+
             if (lambdaFrom.Contains(own))
+            {
                 own = data.InstanceNames[lambdaFrom.IndexOf(own)];
+            }
+
             if ((member == "Length" || member == "Count") && !data.InstanceNames.Contains(own))
+            {
                 member = "length";
+            }
+
             string prefix = own == "" ? "" : own + ".";
             string suffix = member == "length" || plainMember ? "" : "()";
             string result = prefix + member + suffix;
+
             if (data.Aliases.ContainsKey(result))
+            {
                 result = data.Aliases[result];
+            }
             else if (data.Aliases.ContainsKey(prefix + member))
+            {
                 result = data.Aliases[prefix + member];
+            }
+
             return result;
         }
 
