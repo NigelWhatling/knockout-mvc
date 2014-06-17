@@ -187,36 +187,42 @@
             return tagBuilder;
         }
 
-        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null)
+        public KnockoutSelectTagBuilder<TModel, object> DropDownList(string customBinding, string text, object htmlAttributes = null)
         {
-            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases);
+            var tagBuilder = new KnockoutSelectTagBuilder<TModel, object>(this.Context, text, InstanceNames, Aliases, customBinding);
             tagBuilder.ApplyAttributes(htmlAttributes);
             return tagBuilder;
+        }
+
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null)
+        {
+            return this.DropDownList<TItem, object, object>(null, options, htmlAttributes, null, null);
         }
 
         public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(string customBinding, Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null)
         {
-            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases, customBinding);
-            tagBuilder.ApplyAttributes(htmlAttributes);
-            return tagBuilder;
+            return this.DropDownList<TItem, object, object>(customBinding, options, htmlAttributes, null, null);
+        }
+        
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem, TTextProperty, TValueProperty>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, TTextProperty>> optionsText = null, Expression<Func<TItem, TValueProperty>> optionsValue = null)
+        {
+            return this.DropDownList(null, options, htmlAttributes, optionsText, optionsValue);
         }
 
-        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null, Expression<Func<TItem, object>> optionsValue = null)
+        public KnockoutSelectTagBuilder<TModel, TItem> DropDownList<TItem, TTextProperty, TValueProperty>(string customBinding, Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, TTextProperty>> optionsText = null, Expression<Func<TItem, TValueProperty>> optionsValue = null)
         {
-            var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, InstanceNames, Aliases);
+            KnockoutSelectTagBuilder<TModel, TItem> tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, options, this.InstanceNames, this.Aliases, customBinding);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            //if (options != null)
-            //    tagBuilder.Options(Expression.Lambda<Func<TModel, IEnumerable>>(options.Body, options.Parameters));
+
             if (optionsText != null)
             {
-                var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
-                tagBuilder.OptionsText("function(item) { return " + KnockoutExpressionConverter.Convert(optionsText, data) + "; }");
+                tagBuilder.OptionsText(optionsText);
             }
             if (optionsValue != null)
             {
-                var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
-                tagBuilder.OptionsValue("function(item) { return " + KnockoutExpressionConverter.Convert(optionsValue, data) + "; }");
+                tagBuilder.OptionsValue(optionsValue);
             }
+
             return tagBuilder;
         }
 
@@ -237,9 +243,9 @@
             return tagBuilder;
         }
 
-        public KnockoutSelectTagBuilder<TModel, TItem> ListBox<TItem>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, object>> optionsText = null)
+        public KnockoutSelectTagBuilder<TModel, TItem> ListBox<TItem, TTextProperty, TValueProperty>(Expression<Func<TModel, IList<TItem>>> options, object htmlAttributes = null, Expression<Func<TItem, TTextProperty>> optionsText = null, Expression<Func<TItem, TValueProperty>> optionsValue = null)
         {
-            var tagBuilder = DropDownList(options, htmlAttributes, optionsText);
+            var tagBuilder = this.DropDownList(options, htmlAttributes, optionsText, optionsValue);
             tagBuilder.ApplyAttributes(new { multiple = "multiple" });
             return tagBuilder;
         }

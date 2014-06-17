@@ -7,7 +7,15 @@
     using System.Linq.Expressions;
     using System.Web;
 
-    public class KnockoutSelectBinding<TModel, TItem> : KnockoutBinding<TModel>
+    public class KnockoutSelectBinding<TModel> : KnockoutBinding<TModel>
+    {
+        public KnockoutSelectBinding(KnockoutContext<TModel> context, string[] instanceNames = null, Dictionary<string, string> aliases = null)
+            : base(context, instanceNames, aliases)
+        {
+        }
+    }
+
+    public class KnockoutSelectBinding<TModel, TItem> : KnockoutSelectBinding<TModel>
     {
         public KnockoutSelectBinding(KnockoutContext<TModel> context, string[] instanceNames = null, Dictionary<string, string> aliases = null)
             : base(context, instanceNames, aliases)
@@ -34,15 +42,16 @@
 
         public KnockoutSelectBinding<TModel, TItem> OptionsText<TProperty>(Expression<Func<TItem, TProperty>> binding)
         {
-            var data = new KnockoutExpressionData { InstanceNames = new[] { "" } };
+            var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
             string value = KnockoutExpressionConverter.Convert(binding, data);
-            if (value.Contains("("))
+
+            if (binding is LambdaExpression && binding.Body is MemberExpression && value == String.Format("item.{0}", ((MemberExpression)binding.Body).Member.Name))
             {
-                this.Items.Add(new KnockoutBindingStringItem("optionsText", "function () { return " + value + " }"));
+                this.Items.Add(new KnockoutBindingStringItem("optionsText", ((MemberExpression)binding.Body).Member.Name));
             }
             else
             {
-                this.Items.Add(new KnockoutBindingStringItem("optionsText", value));
+                this.Items.Add(new KnockoutBindingStringItem("optionsText", "function(item) { return " + value + "; }", false));
             }
 
             return this;
@@ -62,15 +71,16 @@
 
         public KnockoutSelectBinding<TModel, TItem> OptionsValue<TProperty>(Expression<Func<TItem, TProperty>> binding)
         {
-            var data = new KnockoutExpressionData { InstanceNames = new[] { "" } };
+            var data = new KnockoutExpressionData { InstanceNames = new[] { "item" } };
             string value = KnockoutExpressionConverter.Convert(binding, data);
-            if (value.Contains("("))
+
+            if (binding is LambdaExpression && binding.Body is MemberExpression && value == String.Format("item.{0}", ((MemberExpression)binding.Body).Member.Name))
             {
-                this.Items.Add(new KnockoutBindingStringItem("optionsValue", "function () { return " + value + " }"));
+                this.Items.Add(new KnockoutBindingStringItem("optionsValue", ((MemberExpression)binding.Body).Member.Name));
             }
             else
             {
-                this.Items.Add(new KnockoutBindingStringItem("optionsValue", value));
+                this.Items.Add(new KnockoutBindingStringItem("optionsValue", "function(item) { return " + value + "; }", false));
             }
 
             return this;

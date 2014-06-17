@@ -19,6 +19,14 @@
             this.Items.Add(new KnockoutBindingItem<TModel, IList<TItem>>(customBinding ?? "options", options));
         }
 
+        public KnockoutSelectTagBuilder(KnockoutContext<TModel> context, string text, string[] instanceNames, Dictionary<string, string> aliases, string customBinding = null)
+            : base(context, instanceNames, aliases)
+        {
+            tagBuilder = new TagBuilder("select");
+            TagRenderMode = TagRenderMode.Normal;
+            this.Items.Add(new KnockoutBindingStringItem(customBinding ?? "options", text, false));
+        }
+
         public void ApplyAttributes(object htmlAttributes)
         {
             ApplyAttributes(HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
