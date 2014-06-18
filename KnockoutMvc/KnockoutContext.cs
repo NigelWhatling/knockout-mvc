@@ -137,11 +137,6 @@
             var json = JsonConvert.SerializeObject(model, Formatting.None, new JsonSerializerSettings { ReferenceLoopHandling = referenceLoopHandling });
 
             sb.AppendLine(@"<script type=""text/javascript"">");
-            if (this.UseAntiForgeryToken)
-            {
-                sb.AppendLine(this.GetAntiForgeryToken());
-            }
-
             sb.AppendLine(string.Format("var {0}Js = {1};", ViewModelName, json));
             var mappingData = KnockoutJsModelBuilder.CreateMappingData<TModel>();
             if (mappingData == "{}")
@@ -154,7 +149,7 @@
                 sb.AppendLine(string.Format("var {0} = ko.mapping.fromJS({0}Js, {0}MappingData); ", ViewModelName));
             }
             sb.AppendLine(KnockoutJsModelBuilder.AddComputedToModel(model, ViewModelName));
-            sb.AppendLine("ko.mvc.init(" + ViewModelName + ");");
+            sb.AppendLine("ko.mvc.init(" + ViewModelName + ", \"" + this.GetAntiForgeryToken() + "\");");
             if (needBinding)
             {
                 if (searchScope == null)
@@ -181,10 +176,6 @@
             {
                 var sb = new StringBuilder();
                 sb.AppendLine(@"<script type=""text/javascript"">");
-                if (this.UseAntiForgeryToken)
-                {
-                    sb.AppendLine(this.GetAntiForgeryToken());
-                }
 
                 if (SearchScope == null)
                 {
@@ -480,7 +471,7 @@
             string tokenHtml = System.Web.Helpers.AntiForgery.GetHtml().ToHtmlString();
             int start = tokenHtml.IndexOf(pattern);
             tokenHtml = tokenHtml.Substring(start + pattern.Length);
-            return String.Format("var ko_CSRF_Token = \"{0}\";", tokenHtml.Substring(0, tokenHtml.IndexOf('"')));
+            return tokenHtml.Substring(0, tokenHtml.IndexOf('"'));
         }
     }
 
