@@ -236,14 +236,6 @@
             return new HtmlString(sb.ToString());
         }
 
-        private int ActiveSubcontextCount
-        {
-            get
-            {
-                return ContextStack.Count - 1 - ContextStack.IndexOf(this);
-            }
-        }
-
         public KnockoutForeachContext<TItem> Foreach<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
         {
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
@@ -302,14 +294,29 @@
 
         public string GetInstanceName()
         {
-            switch (ActiveSubcontextCount)
+            if (this.ActiveSubcontextCount == 0)
             {
-                case 0:
-                    return "";
-                case 1:
-                    return "$parent";
-                default:
-                    return "$parents[" + (ActiveSubcontextCount - 1) + "]";
+                return "";
+            }
+            else if (this.ActiveSubcontextCount == 1)
+            {
+                return "$parent";
+            }
+            else if (this.ActiveSubcontextCount == this.ContextStack.Count)
+            {
+                return "$root";
+            }
+            else
+            {
+                return "$parents[" + (this.ActiveSubcontextCount - 1) + "]";
+            }
+        }
+
+        private int ActiveSubcontextCount
+        {
+            get
+            {
+                return this.ContextStack.Count - 1 - this.ContextStack.IndexOf(this);
             }
         }
 
