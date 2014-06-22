@@ -9,14 +9,19 @@
     {
     }
 
-    public class KnockoutTagBuilder<TModel> : KnockoutBinding<TModel>, IKnockoutTagBuilder
+    public interface IKnockoutTagBuilder<TModel> : IKnockoutBinding<TModel>, IKnockoutTagBuilder
     {
-        private readonly TagBuilder tagBuilder;
+        void ApplyAttributes(object htmlAttributes);
+        void ApplyAttributes(IDictionary<string, object> htmlAttributes);
+        void ApplyAttribute(string name, object value);
+        void RemoveAttribute(string name);
+    }
 
+    public class KnockoutTagBuilder<TModel> : KnockoutBinding<TModel>, IKnockoutTagBuilder<TModel>
+    {
         public KnockoutTagBuilder(KnockoutContext<TModel> context, string tagName, string[] instanceNames, Dictionary<string, string> aliases)
-            : base(context, instanceNames, aliases)
+            : base(context, tagName, instanceNames, aliases)
         {
-            tagBuilder = new TagBuilder(tagName);
             TagRenderMode = TagRenderMode.Normal;
         }
 

@@ -7,29 +7,31 @@
     using System.Text;
     using System.Web.Mvc;
 
-    public class KnockoutSelectTagBuilder<TModel, TItem> : KnockoutSelectBinding<TModel, TItem>, IKnockoutTagBuilder
+    public class KnockoutSelectTagBuilder<TModel, TItem> : KnockoutSelectBinding<TModel, TItem>, IKnockoutTagBuilder<TModel>, IKnockoutTagBuilder
     {
-        private readonly TagBuilder tagBuilder;
-
-        public KnockoutSelectTagBuilder(KnockoutContext<TModel> context, Expression<Func<TModel, IList<TItem>>> options, string[] instanceNames, Dictionary<string, string> aliases, string customBinding = null)
+        public KnockoutSelectTagBuilder(KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases)
             : base(context, instanceNames, aliases)
         {
-            tagBuilder = new TagBuilder("select");
             TagRenderMode = TagRenderMode.Normal;
-            this.Items.Add(new KnockoutBindingItem<TModel, IList<TItem>>(customBinding ?? "options", options));
+        }
+
+        public KnockoutSelectTagBuilder(KnockoutContext<TModel> context, IKnockoutContext optionsContext, Expression options, string[] instanceNames, Dictionary<string, string> aliases, string customBinding = null)
+            : base(context, instanceNames, aliases)
+        {
+            TagRenderMode = TagRenderMode.Normal;
+            this.Items.Add(new KnockoutBindingItem(customBinding ?? "options", options, optionsContext ?? context));
         }
 
         public KnockoutSelectTagBuilder(KnockoutContext<TModel> context, string text, string[] instanceNames, Dictionary<string, string> aliases, string customBinding = null)
             : base(context, instanceNames, aliases)
         {
-            tagBuilder = new TagBuilder("select");
             TagRenderMode = TagRenderMode.Normal;
             this.Items.Add(new KnockoutBindingStringItem(customBinding ?? "options", text, false));
         }
 
         public void ApplyAttributes(object htmlAttributes)
         {
-            ApplyAttributes(HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
+            this.ApplyAttributes(HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
         public void ApplyAttributes(IDictionary<string, object> htmlAttributes)

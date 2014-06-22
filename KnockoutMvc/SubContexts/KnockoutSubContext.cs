@@ -4,9 +4,9 @@
 
     public abstract class KnockoutSubContext<TModel>
     {
-        protected KnockoutContext<TModel> Context { get; set; }
-        protected string[] InstanceNames { get; set; }
-        protected Dictionary<string, string> Aliases { get; set; }
+        internal KnockoutContext<TModel> Context { get; set; }
+        internal string[] InstanceNames { get; set; }
+        internal Dictionary<string, string> Aliases { get; set; }
 
         protected KnockoutSubContext(KnockoutContext<TModel> context, string[] instanceNames = null, Dictionary<string, string> aliases = null)
         {
