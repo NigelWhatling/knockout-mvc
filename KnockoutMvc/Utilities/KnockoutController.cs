@@ -37,6 +37,11 @@
 
         #region RedirectToAction
 
+        protected KnockoutJsonResult JsonRedirectToAction(string actionName)
+        {
+            return this.JsonRedirectToAction(actionName, null, null);
+        }
+
         protected KnockoutJsonResult JsonRedirectToAction(string actionName, object routeValues)
         {
             return this.JsonRedirectToAction(actionName, null, new RouteValueDictionary(routeValues));
@@ -54,7 +59,21 @@
 
         protected virtual KnockoutJsonResult JsonRedirectToAction(string actionName, string controllerName, RouteValueDictionary routeValues)
         {
-            return new KnockoutJsonResult(this.Url.Action(actionName, controllerName, routeValues));
+            if (controllerName == null)
+            {
+                return new KnockoutJsonResult(this.Url.Action(actionName));
+            }
+            else
+            {
+                if (routeValues == null)
+                {
+                    return new KnockoutJsonResult(this.Url.Action(actionName, controllerName));
+                }
+                else
+                {
+                    return new KnockoutJsonResult(this.Url.Action(actionName, controllerName, routeValues));
+                }
+            }
         }
 
         #endregion

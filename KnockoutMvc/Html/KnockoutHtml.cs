@@ -191,6 +191,7 @@
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "textarea", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
+            this.ApplyUnobtrusiveValidationAttributes(tagBuilder, expression);
             tagBuilder.Value(expression);
             return tagBuilder;
         }

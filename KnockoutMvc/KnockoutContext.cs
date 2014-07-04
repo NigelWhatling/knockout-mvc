@@ -123,6 +123,11 @@
 
         private string GetInitializeData(TModel model, string searchScope, bool needBinding, ReferenceLoopHandling referenceLoopHandling = ReferenceLoopHandling.Error)
         {
+            if (model == null)
+            {
+                throw new ArgumentNullException("model");
+            }
+
             if (isInitialized)
             {
                 return String.Empty;
