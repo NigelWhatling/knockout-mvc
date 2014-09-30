@@ -139,7 +139,11 @@
 
             var sb = new StringBuilder();
 
-            var json = JsonConvert.SerializeObject(model, Formatting.None, new JsonSerializerSettings { ReferenceLoopHandling = referenceLoopHandling });
+            var json = JsonConvert.SerializeObject(model, Formatting.None, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = referenceLoopHandling,
+                StringEscapeHandling = StringEscapeHandling.EscapeHtml
+            });
 
             sb.AppendLine(@"<script type=""text/javascript"">");
             sb.AppendLine(string.Format("var {0}Js = {1};", ViewModelName, json));
@@ -227,11 +231,6 @@
             string overrideFunction = sb.ToString();
             sb = new StringBuilder();
             sb.AppendLine(@"<script type=""text/javascript""> ");
-            if (this.UseAntiForgeryToken)
-            {
-                sb.AppendLine(this.GetAntiForgeryToken());
-            }
-
             sb.AppendLine(String.Format("var {0};", ViewModelName));
             sb.Append("$(document).ready(function() { ");
             sb.Append(this.ServerAction(actionName, controllerName, routeValues: routeValues, bindingIn: bindingIn, bindingOut: bindingOut, settings: settings, successOverride: overrideFunction));
@@ -282,19 +281,58 @@
             return regionContext;
         }
 
-        public KnockoutFormContext<TSubModel> FormContext<TSubModel>(Expression<Func<TModel, TSubModel>> binding, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, TSubModel>> bindingIn = null, KnockoutExecuteSettings settings = null)
+        public KnockoutFormContext<TModelData> FormContext<TModelData>(Expression<Func<TModel, TModelData>> modelData, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, KnockoutExecuteSettings settings = null, Expression<Func<KnockoutTagBuilder<TModelData>, KnockoutBinding<TModelData>>> binding = null)
         {
-            string bindingName = KnockoutExpressionConverter.Convert(binding, CreateData());
-            string modelOut = this.ViewModelName + "." + bindingName;
-            string modelIn = bindingIn != null ? KnockoutExpressionConverter.Convert(bindingIn, CreateData()) : null;
-            var formContext = new KnockoutFormContext<TSubModel>(
-              this.CreateContext<TSubModel>(model => binding.Compile().Invoke(model)),
-              this.CreateData().InstanceNames, this.CreateData().Aliases,
-              actionName, controllerName, routeValues, htmlAttributes, withBinding: bindingName, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
+            return this.FormContext<TModelData, TModelData>(modelData, actionName, controllerName, routeValues, htmlAttributes, null, settings);
+        }
+
+        public KnockoutFormContext<TModelData> FormContext<TModelData, TModelDataReturn>(Expression<Func<TModel, TModelData>> modelData, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, TModelDataReturn>> modelDataReturn = null, KnockoutExecuteSettings settings = null, Expression<Func<KnockoutTagBuilder<TModelData>, KnockoutBinding<TModelData>>> binding = null)
+        {
+            string modelDataName;
+            string modelOut;
+            string withBinding = null;
+            if (modelData != null)
+            {
+                modelDataName = KnockoutExpressionConverter.Convert(modelData, CreateData());
+                modelOut = this.ViewModelName + "." + modelDataName;
+                withBinding = modelDataName;
+            }
+            else
+            {
+                modelDataName = "$data";
+                modelOut = "$data";
+            }
+
+            string modelIn = modelDataReturn != null ? KnockoutExpressionConverter.Convert(modelDataReturn, CreateData()) : null;
+
+            var formContext = new KnockoutFormContext<TModelData>(
+                modelData == null ? this as KnockoutContext<TModelData> : this.CreateContext<TModelData>(model => modelData.Compile().Invoke(model)),
+              this.CreateData().InstanceNames,
+              this.CreateData().Aliases,
+              actionName,
+              controllerName,
+              routeValues,
+              htmlAttributes,
+              withBinding: withBinding,
+              modelData: modelOut,
+              modelDataReturn: modelIn,
+              settings: settings,
+              binding: binding);
+
             formContext.WriteStart(viewContext.Writer);
             formContext.ContextStack = this.ContextStack;
-            this.ContextStack.Add(formContext);
+
+            if (modelData != null)
+            {
+                this.ContextStack.Add(formContext);
+            }
+
             return formContext;
+        }
+
+        public KnockoutFormContext<TModel> FormContextData(string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, KnockoutExecuteSettings settings = null, Expression<Func<KnockoutTagBuilder<TModel>, KnockoutBinding<TModel>>> binding = null)
+        {
+            return this.FormContext<TModel, TModel>(null, actionName, controllerName, routeValues, htmlAttributes, null, settings, binding);
         }
 
         public string GetInstanceName()
@@ -464,11 +502,6 @@
                 url = url.Replace(token, "'+" + tokens[token].ToHtmlString() + "+'");
             }
 
-            if (url.EndsWith("+''"))
-            {
-                url = url.Substring(0, url.Length - 3);
-            }
-
             return url;
         }
 
@@ -484,6 +517,51 @@
             int start = tokenHtml.IndexOf(pattern);
             tokenHtml = tokenHtml.Substring(start + pattern.Length);
             return tokenHtml.Substring(0, tokenHtml.IndexOf('"'));
+        }
+
+        public KnockoutScriptItem GetObservable(string name)
+        {
+            //return new KnockoutScriptItem(this.Context.ViewModelName + "." + name + "()", isInline);
+            return new KnockoutScriptItem(name + "()");
+        }
+
+        public KnockoutScriptItem GetObservable<TProperty>(Expression<Func<TModel, TProperty>> expression)
+        {
+            string name = KnockoutExpressionConverter.Convert(expression, CreateData());
+            return new KnockoutScriptItem(name + (name[0] == '(' ? String.Empty : "()"));
+        }
+
+        public KnockoutScriptItem SetObservable(string name, string value)
+        {
+            return new KnockoutScriptItem(this.ViewModelName + "." + name + "(" + value + ")");
+        }
+
+        public KnockoutScriptItem SetObservable<TProperty>(Expression<Func<TModel, TProperty>> expression, string value)
+        {
+            string name = KnockoutExpressionConverter.Convert(expression, this.CreateData());
+            return new KnockoutScriptItem(this.ViewModelName + "." + name + "(" + value + ")");
+        }
+
+
+        internal ModelMetadata GetModelMetadata<TProperty>(Expression<Func<TModel, TProperty>> expression)
+        {
+            return ModelMetadata.FromLambdaExpression(expression, this.HtmlHelper.ViewData);
+        }
+
+        internal string GetFieldName(string name)
+        {
+            return (this.ExpressionTree + "." + name).TrimStart('.').Replace("[]", "['+$index()+']");
+        }
+
+        internal string GetSanitisedFieldName(string name)
+        {
+            string str = TagBuilder.CreateSanitizedId((this.ExpressionTree + "." + name).TrimStart('.').Replace("[]", ":_index_:"));
+            if (!String.IsNullOrWhiteSpace(str))
+            {
+                str = str.Replace(":_index_:", "_'+$index()+'_");
+            }
+
+            return str;
         }
     }
 

@@ -11,7 +11,7 @@
     public interface IKnockoutBinding<TModel>
     {
         KnockoutBinding<TModel> Attr<TProperty>(string name, Expression<Func<TModel, TProperty>> binding);
-        KnockoutBinding<TModel> Attr(string name, string binding);
+        KnockoutBinding<TModel> Attr(string name, string binding, bool isWord);
     }
 
     public class KnockoutBinding<TModel> : KnockoutSubContext<TModel>, IKnockoutBinding<TModel>, IHtmlString
@@ -27,6 +27,80 @@
         public KnockoutBinding(KnockoutContext<TModel> context, string[] instanceNames = null, Dictionary<string, string> aliases = null)
             : base(context, instanceNames, aliases)
         {
+        }
+
+        internal void ApplyUnobtrusiveValidationAttributes<TProperty, TContextModel>(KnockoutContext<TContextModel> context, IKnockoutTagBuilder<TModel> tagBuilder, Expression<Func<TContextModel, TProperty>> expression)
+        {
+            if (expression != null)
+            {
+                //string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
+                string name = ExpressionHelper.GetExpressionText(expression);
+                if (context.GetFieldName(name).Contains("$index()"))
+                {
+                    tagBuilder.Attr("id", context.GetSanitisedFieldName(name), true);
+                    tagBuilder.Attr("name", context.GetFieldName(name), true);
+                }
+                else
+                {
+                    tagBuilder.ApplyAttributes(new { id = context.GetSanitisedFieldName(name), name = context.GetFieldName(name) });
+                }
+
+                // Add unobtrusive validation attributes
+                ModelMetadata metadata = context.GetModelMetadata(expression);
+                IDictionary<string, object> validationAttributes = context.HtmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
+                tagBuilder.ApplyAttributes(validationAttributes);
+            }
+        }
+
+        public KnockoutBinding<TModel> Name<TProperty>(Expression<Func<TModel, TProperty>> expression)
+        {
+            return this.Name(this.Context, expression);
+        }
+
+        public KnockoutBinding<TModel> Name<TProperty, TParent>(KnockoutContext<TParent> context, Expression<Func<TParent, TProperty>> expression)
+        {
+            IKnockoutTagBuilder<TModel> tagBuilder = this as IKnockoutTagBuilder<TModel>;
+            if (tagBuilder == null)
+            {
+                throw new NotSupportedException();
+            }
+
+            string name = ExpressionHelper.GetExpressionText(expression);
+            if (context.GetFieldName(name).Contains("$index()"))
+            {
+                tagBuilder.Attr("id", context.GetSanitisedFieldName(name), true);
+                tagBuilder.Attr("name", context.GetFieldName(name), true);
+            }
+            else
+            {
+                tagBuilder.ApplyAttributes(new { id = context.GetSanitisedFieldName(name), name = context.GetFieldName(name) });
+            }
+
+            return this;
+        }
+
+        public KnockoutBinding<TModel> UnobtrusiveValidationAttributes<TProperty>(Expression<Func<TModel, TProperty>> expression)
+        {
+            IKnockoutTagBuilder<TModel> tagBuilder = this as IKnockoutTagBuilder<TModel>;
+            if (tagBuilder == null)
+            {
+                throw new NotSupportedException();
+            }
+
+            this.ApplyUnobtrusiveValidationAttributes(this.Context, tagBuilder, expression);
+            return this;
+        }
+
+        public KnockoutBinding<TModel> UnobtrusiveValidationAttributes<TProperty, TParent>(KnockoutContext<TParent> context, Expression<Func<TParent, TProperty>> expression)
+        {
+            IKnockoutTagBuilder<TModel> tagBuilder = this as IKnockoutTagBuilder<TModel>;
+            if (tagBuilder == null)
+            {
+                throw new NotSupportedException();
+            }
+
+            this.ApplyUnobtrusiveValidationAttributes(context, tagBuilder, expression);
+            return this;
         }
 
         // *** Controlling text and appearance ***
@@ -85,6 +159,12 @@
         public KnockoutBinding<TModel> Html(Expression<Func<TModel, Expression<Func<string>>>> binding)
         {
             Items.Add(new KnockoutBindingItem("html", binding));
+            return this;
+        }
+
+        public KnockoutBinding<TModel> Html(string binding)
+        {
+            Items.Add(new KnockoutBindingStringItem("html", binding, false));
             return this;
         }
 
@@ -246,9 +326,9 @@
             return this;
         }
 
-        public KnockoutBinding<TModel> Attr(string name, string binding)
+        public KnockoutBinding<TModel> Attr(string name, string binding, bool isWord = true)
         {
-            ComplexItem("attr").Add(new KnockoutBindingStringItem(name, binding));
+            ComplexItem("attr").Add(new KnockoutBindingStringItem(name, binding, isWord));
             return this;
         }
 

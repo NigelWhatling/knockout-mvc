@@ -18,38 +18,11 @@
             this.viewContext = viewContext;
         }
 
-        private ModelMetadata GetModelMetadata<TProperty>(Expression<Func<TModel, TProperty>> expression)
-        {
-            return ModelMetadata.FromLambdaExpression(expression, this.Context.HtmlHelper.ViewData);
-        }
-
-        private void ApplyUnobtrusiveValidationAttributes<TProperty>(IKnockoutTagBuilder<TModel> tagBuilder, Expression<Func<TModel, TProperty>> expression)
-        {
-            if (expression != null)
-            {
-                string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
-                if (this.GetFieldName(name).Contains("$index()"))
-                {
-                    tagBuilder.Attr("id", this.GetSanitisedFieldName(name));
-                    tagBuilder.Attr("name", this.GetFieldName(name));
-                }
-                else
-                {
-                    tagBuilder.ApplyAttributes(new { id = this.GetSanitisedFieldName(name), name = this.GetFieldName(name) });
-                }
-
-                // Add unobtrusive validation attributes
-                ModelMetadata metadata = this.GetModelMetadata(expression);
-                IDictionary<string, object> validationAttributes = this.Context.HtmlHelper.GetUnobtrusiveValidationAttributes(name, metadata);
-                tagBuilder.ApplyAttributes(validationAttributes);
-            }
-        }
-
         private KnockoutTagBuilder<TModel> Input<TProperty>(Expression<Func<TModel, TProperty>> expression, string type, object htmlAttributes = null)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "input", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            this.ApplyUnobtrusiveValidationAttributes(tagBuilder, expression);
+            tagBuilder.ApplyUnobtrusiveValidationAttributes(this.Context, tagBuilder, expression);
 
             if (!string.IsNullOrWhiteSpace(type))
             {
@@ -73,16 +46,16 @@
             if (expression != null)
             {
                 string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
-                if (this.GetFieldName(name).Contains("$index()"))
+                if (this.Context.GetFieldName(name).Contains("$index()"))
                 {
-                    tagBuilder.Attr("for", this.GetSanitisedFieldName(name));
+                    tagBuilder.Attr("for", this.Context.GetSanitisedFieldName(name));
                 }
                 else
                 {
-                    tagBuilder.ApplyAttribute("for", this.GetSanitisedFieldName(name));
+                    tagBuilder.ApplyAttribute("for", this.Context.GetSanitisedFieldName(name));
                 }
 
-                ModelMetadata metadata = this.GetModelMetadata(expression);
+                ModelMetadata metadata = this.Context.GetModelMetadata(expression);
                 tagBuilder.SetInnerText(metadata.DisplayName ?? metadata.PropertyName);
             }
 
@@ -97,35 +70,18 @@
             if (expression != null)
             {
                 string name = KnockoutExpressionConverter.Convert(expression, this.CreateData()); // ExpressionHelper.GetExpressionText(expression);
-                if (this.GetFieldName(name).Contains("$index()"))
+                if (this.Context.GetFieldName(name).Contains("$index()"))
                 {
-                    tagBuilder.Attr("data-valmsg-for", this.GetFieldName(name));
+                    tagBuilder.Attr("data-valmsg-for", this.Context.GetFieldName(name));
                     tagBuilder.RemoveAttribute("data-valmsg-for");
                 }
                 else
                 {
-                    tagBuilder.ApplyAttribute("data-valmsg-for", this.GetFieldName(name));
+                    tagBuilder.ApplyAttribute("data-valmsg-for", this.Context.GetFieldName(name));
                 }
             }
 
             return tagBuilder;
-        }
-
-
-        private string GetFieldName(string name)
-        {
-            return (this.Context.ExpressionTree + "." + name).TrimStart('.').Replace("[]", "['+$index()+']");
-        }
-
-        private string GetSanitisedFieldName(string name)
-        {
-            string str = TagBuilder.CreateSanitizedId((this.Context.ExpressionTree + "." + name).TrimStart('.').Replace("[]", ":_index_:"));
-            if (!String.IsNullOrWhiteSpace(str))
-            {
-                str = str.Replace(":_index_:", "_'+$index()+'_");
-            }
-
-            return str;
         }
 
         public KnockoutTagBuilder<TModel> TextBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
@@ -191,7 +147,7 @@
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "textarea", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            this.ApplyUnobtrusiveValidationAttributes(tagBuilder, expression);
+            tagBuilder.ApplyUnobtrusiveValidationAttributes(this.Context, tagBuilder, expression);
             tagBuilder.Value(expression);
             return tagBuilder;
         }
@@ -285,7 +241,7 @@
         {
             var tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, this.Context, optionsExpression, this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            this.ApplyUnobtrusiveValidationAttributes(tagBuilder, valueExpression);
+            tagBuilder.ApplyUnobtrusiveValidationAttributes(this.Context, tagBuilder, valueExpression);
             
             if (!string.IsNullOrEmpty(optionsTextRaw))
             {
@@ -317,7 +273,7 @@
             KnockoutSelectTagBuilder<TModel, TItem> tagBuilder = new KnockoutSelectTagBuilder<TModel, TItem>(this.Context, optionsContext, optionsExpression, this.InstanceNames, this.Aliases, customBinding);
 
             tagBuilder.ApplyAttributes(htmlAttributes);
-            this.ApplyUnobtrusiveValidationAttributes(tagBuilder, valueExpression);
+            tagBuilder.ApplyUnobtrusiveValidationAttributes(this.Context, tagBuilder, valueExpression);
 
             if (optionsTextExpression != null)
             {
@@ -528,7 +484,7 @@
             var formContext = new KnockoutFormContext<TModel>(
               this.Context, //this.Context.CreateContext<TModel>(modelOut),
               this.InstanceNames, this.Aliases,
-              actionName, controllerName, routeValues, htmlAttributes, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
+              actionName, controllerName, routeValues, htmlAttributes, modelData: modelOut, modelDataReturn: modelIn, settings: settings);
             formContext.WriteStart(viewContext.Writer);
             return formContext;
         }
@@ -541,7 +497,7 @@
             var formContext = new KnockoutFormContext<TSubModel>(
               this.Context.CreateContext<TSubModel>(model => binding.Compile().Invoke(model)),
               this.InstanceNames, this.Aliases,
-              actionName, controllerName, routeValues, htmlAttributes, withBinding: bindingName, bindingOut: modelOut, bindingIn: modelIn, settings: settings);
+              actionName, controllerName, routeValues, htmlAttributes, withBinding: bindingName, modelData: modelOut, modelDataReturn: modelIn, settings: settings);
             formContext.WriteStart(viewContext.Writer);
             return formContext;
         }

@@ -1,7 +1,9 @@
 ﻿namespace KnockoutMvc
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq.Expressions;
     using System.Web.Mvc;
 
     public class KnockoutFormContext<TModel> : KnockoutRegionContext<TModel>
@@ -15,13 +17,14 @@
         private readonly object routeValues;
         private readonly object htmlAttributes;
         private readonly string withBinding;
-        private readonly string bindingOut;
-        private readonly string bindingIn;
+        private readonly string modelData;
+        private readonly string modelDataReturn;
         private readonly KnockoutExecuteSettings settings;
+        private readonly Expression<Func<KnockoutTagBuilder<TModel>, KnockoutBinding<TModel>>> binding;
 
         public KnockoutFormContext(
           KnockoutContext<TModel> context, string[] instanceNames, Dictionary<string, string> aliases,
-          string actionName, string controllerName, object routeValues, object htmlAttributes, string withBinding = null, string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
+          string actionName, string controllerName, object routeValues, object htmlAttributes, string withBinding = null, string modelData = null, string modelDataReturn = null, KnockoutExecuteSettings settings = null, Expression<Func<KnockoutTagBuilder<TModel>, KnockoutBinding<TModel>>> binding = null)
             : base(context)
         {
             this.context = context;
@@ -32,9 +35,10 @@
             this.routeValues = routeValues;
             this.htmlAttributes = htmlAttributes;
             this.withBinding = withBinding;
-            this.bindingOut = bindingOut;
-            this.bindingIn = bindingIn;
+            this.modelData = modelData;
+            this.modelDataReturn = modelDataReturn;
             this.settings = settings;
+            this.binding = binding;
             InStack = false;
         }
 
@@ -47,7 +51,12 @@
                 tagBuilder.Custom("with", this.withBinding);
             }
 
-            tagBuilder.Submit(actionName, controllerName, routeValues, bindingOut: this.bindingOut, bindingIn: this.bindingIn, settings: this.settings);
+            if (this.binding != null)
+            {
+                binding.Compile().Invoke(tagBuilder);
+            }
+
+            tagBuilder.Submit(actionName, controllerName, routeValues, bindingOut: this.modelData, bindingIn: this.modelDataReturn, settings: this.settings);
             tagBuilder.TagRenderMode = TagRenderMode.StartTag;
             writer.WriteLine(tagBuilder.ToHtmlString());
         }

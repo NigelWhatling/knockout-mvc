@@ -284,6 +284,19 @@
                 string obj = Visit(m.Arguments[0]);
                 return obj;
             }
+            if (m.Object.Type == typeof(string) && m.Method.Name == "Substring")
+            {
+                if (m.Arguments.Count == 1)
+                {
+                    string obj = Visit(m.Object);
+                    return obj + ".substr(" + Visit(m.Arguments[0]) + ")";
+                }
+                if (m.Arguments.Count == 2)
+                {
+                    string obj = Visit(m.Object);
+                    return obj + ".substr(" + Visit(m.Arguments[0]) + ", " + Visit(m.Arguments[1]) + ")";
+                }
+            }
             if (typeof(Expression).IsAssignableFrom(m.Method.ReturnType))
             {
                 return VisitMemberAccess(m.Object, m.Method.Name);
