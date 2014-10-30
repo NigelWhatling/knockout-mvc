@@ -240,7 +240,7 @@
             return new HtmlString(sb.ToString());
         }
 
-        public KnockoutForeachContext<TItem> Foreach<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
+        public KnockoutForeachContext<TItem> Foreach<TItem>(Expression<Func<TModel, ICollection<TItem>>> binding)
         {
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
             var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(model => { return default(TItem); }), expression);
@@ -250,7 +250,7 @@
             return regionContext;
         }
 
-        public KnockoutForeachContext<TItem> ForeachContext<TItem>(Expression<Func<TModel, IList<TItem>>> binding)
+        public KnockoutForeachContext<TItem> ForeachContext<TItem>(Expression<Func<TModel, ICollection<TItem>>> binding)
         {
             var expression = KnockoutExpressionConverter.Convert(binding, CreateData());
             var regionContext = new KnockoutForeachContext<TItem>(this.CreateContext<TItem>(model => { return default(TItem); }), expression, false);
@@ -283,7 +283,7 @@
 
         public KnockoutFormContext<TModelData> FormContext<TModelData>(Expression<Func<TModel, TModelData>> modelData, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, KnockoutExecuteSettings settings = null, Expression<Func<KnockoutTagBuilder<TModelData>, KnockoutBinding<TModelData>>> binding = null)
         {
-            return this.FormContext<TModelData, TModelData>(modelData, actionName, controllerName, routeValues, htmlAttributes, null, settings);
+            return this.FormContext<TModelData, TModelData>(modelData, actionName, controllerName, routeValues, htmlAttributes, null, settings, binding);
         }
 
         public KnockoutFormContext<TModelData> FormContext<TModelData, TModelDataReturn>(Expression<Func<TModel, TModelData>> modelData, string actionName, string controllerName, object routeValues = null, object htmlAttributes = null, Expression<Func<TModel, TModelDataReturn>> modelDataReturn = null, KnockoutExecuteSettings settings = null, Expression<Func<KnockoutTagBuilder<TModelData>, KnockoutBinding<TModelData>>> binding = null)

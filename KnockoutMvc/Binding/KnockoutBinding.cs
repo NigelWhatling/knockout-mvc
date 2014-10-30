@@ -259,7 +259,7 @@
             return this;
         }
 
-        public KnockoutSelectBinding<TModel, TItem> Options<TItem>(Expression<Func<TModel, IList<TItem>>> expression)
+        public KnockoutSelectBinding<TModel, TItem> Options<TItem>(Expression<Func<TModel, ICollection<TItem>>> expression)
         {
             KnockoutSelectBinding<TModel, TItem> binding = new KnockoutSelectBinding<TModel, TItem>(this.Context, this.Context.CreateData().InstanceNames, this.Context.CreateData().Aliases);
             binding.Items.AddRange(this.Items);
@@ -267,7 +267,7 @@
             return binding;
         }
 
-        public KnockoutSelectBinding<TParent, TItem> Options<TItem, TParent>(KnockoutContext<TParent> context, Expression<Func<TParent, IList<TItem>>> expression)
+        public KnockoutSelectBinding<TParent, TItem> Options<TItem, TParent>(KnockoutContext<TParent> context, Expression<Func<TParent, ICollection<TItem>>> expression)
         {
             KnockoutSelectBinding<TParent, TItem> binding = new KnockoutSelectBinding<TParent, TItem>(context, context.CreateData().InstanceNames, context.CreateData().Aliases);
             binding.Items.AddRange(this.Items);
@@ -333,11 +333,11 @@
         }
 
         // *** Events ***
-        protected virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues,
+        public virtual KnockoutBinding<TModel> Event(string eventName, string actionName, string controllerName, object routeValues,
             string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
         {
             var sb = new StringBuilder();
-            
+
             if (eventName == "submit")
             {
                 sb.Append("function(form) { ");
@@ -350,13 +350,21 @@
             }
 
             sb.Append(" }");
-            Items.Add(new KnockoutBindingStringItem(eventName, sb.ToString(), false));
+            this.Event(eventName, sb.ToString());
             return this;
         }
 
-        protected virtual KnockoutBinding<TModel> Event2(string eventName, string propertyName)
+        public virtual KnockoutBinding<TModel> Event(string eventName, string propertyName)
         {
-            Items.Add(new KnockoutBindingStringItem(eventName, propertyName, false));
+            if (eventName == "click" || eventName == "submit")
+            {
+                this.Items.Add(new KnockoutBindingStringItem(eventName, propertyName, false));
+            }
+            else
+            {
+                this.ComplexItem("event").Add(new KnockoutBindingStringItem(eventName, propertyName, false));
+            }
+
             return this;
         }
 
@@ -367,12 +375,17 @@
 
         public KnockoutBinding<TModel> Click(string propertyName)
         {
-            return Event2("click", propertyName);
+            return Event("click", propertyName);
         }
 
         public KnockoutBinding<TModel> Submit(string actionName, string controllerName, object routeValues = null, string bindingOut = null, string bindingIn = null, KnockoutExecuteSettings settings = null)
         {
             return Event("submit", actionName, controllerName, routeValues, bindingOut: bindingOut, bindingIn: bindingIn, settings: settings);
+        }
+
+        public KnockoutBinding<TModel> Submit(string propertyName)
+        {
+            return Event("submit", propertyName);
         }
 
         // *** Flow Control *** 

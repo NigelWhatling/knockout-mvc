@@ -38,14 +38,14 @@
             return binding;
         }
 
-        public KnockoutSelectTagBuilder<TModel, TNewItem> Options<TNewItem>(Expression<Func<TModel, IList<TNewItem>>> expression, string customBinding = null)
+        public KnockoutSelectTagBuilder<TModel, TNewItem> Options<TNewItem>(Expression<Func<TModel, ICollection<TNewItem>>> expression, string customBinding = null)
         {
             KnockoutSelectTagBuilder<TModel, TNewItem> binding = this.NewTagBuilder<TNewItem>();
             binding.Items.Add(new KnockoutBindingItem(customBinding ?? "options", expression));
             return binding;
         }
 
-        public KnockoutSelectTagBuilder<TParent, TNewItem> Options<TParent, TNewItem>(KnockoutContext<TParent> context, Expression<Func<TParent, IList<TNewItem>>> expression, string customBinding = null)
+        public KnockoutSelectTagBuilder<TParent, TNewItem> Options<TParent, TNewItem>(KnockoutContext<TParent> context, Expression<Func<TParent, ICollection<TNewItem>>> expression, string customBinding = null)
         {
             KnockoutSelectTagBuilder<TParent, TNewItem> binding = this.NewTagBuilder<TParent, TNewItem>(context);
             binding.Items.Add(new KnockoutBindingItem(customBinding ?? "options", expression));

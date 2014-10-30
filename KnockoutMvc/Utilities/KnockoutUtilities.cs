@@ -69,9 +69,11 @@
         {
             if (value == null)
             {
-                if (typeof(string).IsAssignableFrom(type))
-                    return "";
-                if (typeof(IList).IsAssignableFrom(type))
+                //if (typeof(string).IsAssignableFrom(type))
+                //{
+                //    return "";
+                //}
+                if (typeof(ICollection).IsAssignableFrom(type))
                 {
                     ConstructorInfo constructor = type.GetConstructor(new Type[0]);
                     if (constructor != null)
