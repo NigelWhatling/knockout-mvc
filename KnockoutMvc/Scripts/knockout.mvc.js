@@ -2,11 +2,74 @@
 
 ko.mvc.executeSettings = {
     requestType: "POST",
-    processData: undefined,
-    success: undefined,
+    processData: function (data) { return this.defaultProcessData(data); },
+    success: function (data, settings, form) { return this.defaultSuccess(data, settings, form); },
     error: undefined,
+    modelErrors: function (data, settings, form, validator, errors) { return this.defaultModelErrors(data, settings, form, validator, errors); },
     beforeSend: undefined,
-    complete: undefined
+    complete: undefined,
+
+    defaultProcessData: function (data) {
+        if (data.__Data) {
+            return data.__Data;
+        } else {
+            return data;
+        }
+    },
+
+    defaultSuccess: function (data, settings, form) {
+        if (data.__Message) {
+            $.bootstrapGrowl(data.__Message);
+        }
+
+        if (data.__Redirect) {
+            location.href = ko.mvc.resolveUrl(data.__Redirect);
+        }
+
+        var $form = $(form);
+        $form.resetSummary();
+        var validator = $form.data('validator');
+        if (validator) {
+            validator.checkForm();
+            if (data.__ModelErrors) {
+                this.modelErrors(data, settings, form, validator, data.__ModelErrors);
+            }
+        }
+    },
+
+    defaultModelErrors: function (data, settings, form, validator, errors) {
+        var $form = $(form);
+        if (validator) {
+            for (var i = 0; i < errors.length; i++) {
+                if (errors[i].Key.length > 0) {
+                    var element = $form.find("[name='" + errors[i].Key + "'],[name$='." + errors[i].Key + "']");
+                    if (element.length > 0) {
+                        element = element[0];
+
+                        // Push element to error list.
+                        validator.errorList.push({
+                            message: errors[i].Message,
+                            element: element
+                        });
+
+                        // Remove element from success list.
+                        validator.successList = $.grep(validator.successList, function (el) {
+                            return !(el.name == element.name);
+                        });
+                    }
+                }
+                else {
+                    $form.find("[data-valmsg-summary=true]")
+                        .removeClass("validation-summary-valid")
+                        .addClass("validation-summary-errors")
+                        .find("ul")
+                        .append("<li>" + errors[i].Message + "</li>");
+                }
+            }
+
+            validator.defaultShowErrors();
+        }
+    }
 };
 
 ko.mvc.init = function (viewModel, requestValidationToken) {
@@ -95,50 +158,6 @@ ko.mvc.resolveUrl = function (url) {
     return url;
 };
 
-ko.mvc.executeSettings.processData = function (data) {
-    if (data.__Data) {
-        return data.__Data;
-    } else {
-        return data;
-    }
-}
-
-ko.mvc.executeSettings.success = function (data, settings, form) {
-    if (data.__Message) {
-        $.bootstrapGrowl(data.__Message);
-    }
-
-    if (data.__Redirect) {
-        location.href = ko.mvc.resolveUrl(data.__Redirect);
-    }
-
-    var $form = $(form);
-    $form.resetSummary();
-    var validator = $form.data('validator');
-    if (validator) {
-        validator.checkForm();
-        if (data.__ModelErrors) {
-            for (var i = 0; i < data.__ModelErrors.length; i++) {
-                if (data.__ModelErrors[i].Key.length > 0) {
-                    validator.errorList.push({
-                        message: data.__ModelErrors[i].Message,
-                        element: $form.find("[name='" + data.__ModelErrors[i].Key + "']")
-                    });
-                }
-                else {
-                    $form.find("[data-valmsg-summary=true]")
-                        .removeClass("validation-summary-valid")
-                        .addClass("validation-summary-errors")
-                        .find("ul")
-                        .append("<li>" + data.__ModelErrors[i].Message + "</li>");
-                }
-            }
-
-            validator.defaultShowErrors();
-        }
-    }
-}
-
 // @torbjorn-nomell http://stackoverflow.com/a/15136297/517016
 //
 jQuery.fn.resetSummary = function () {
@@ -169,4 +188,3 @@ jQuery.fn.resetSummary = function () {
 //    });
 //});
 // --@torbjorn-nomell
-
