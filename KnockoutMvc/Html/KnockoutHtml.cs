@@ -18,7 +18,7 @@
             this.viewContext = viewContext;
         }
 
-        private KnockoutTagBuilder<TModel> Input<TProperty>(Expression<Func<TModel, TProperty>> expression, string type, object htmlAttributes = null)
+        private KnockoutTagBuilder<TModel> Input<TProperty>(Expression<Func<TModel, TProperty>> expression, string type, object htmlAttributes = null, bool immediate = false)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(this.Context, "input", this.InstanceNames, this.Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
@@ -31,7 +31,14 @@
 
             if (expression != null)
             {
-                tagBuilder.Value(expression);
+                if (immediate)
+                {
+                    tagBuilder.TextInput(expression);
+                }
+                else
+                {
+                    tagBuilder.Value(expression);
+                }
             }
 
             tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
@@ -84,14 +91,14 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> TextBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> TextBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
-            return Input(expression, "text", htmlAttributes);
+            return Input(expression, "text", htmlAttributes, immediate);
         }
 
-        public KnockoutTagBuilder<TModel> Password<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Password<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
-            return Input(expression, "password", htmlAttributes);
+            return Input(expression, "password", htmlAttributes, immediate);
         }
 
         public KnockoutTagBuilder<TModel> Hidden<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
@@ -99,9 +106,9 @@
             return Input(expression, "hidden", htmlAttributes);
         }
 
-        public KnockoutTagBuilder<TModel> RadioButton<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, object checkedValue = null)
+        public KnockoutTagBuilder<TModel> RadioButton<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, object checkedValue = null, bool immediate = false)
         {
-            var tagBuilder = this.Input<TProperty>(null, "radio", htmlAttributes);
+            var tagBuilder = this.Input<TProperty>(null, "radio", htmlAttributes, immediate);
             tagBuilder.Checked(expression);
             if (checkedValue != null)
             {
@@ -111,9 +118,9 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> CheckBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, object checkedValue = null)
+        public KnockoutTagBuilder<TModel> CheckBox<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, object checkedValue = null, bool immediate = false)
         {
-            var tagBuilder = this.Input<TProperty>(null, "checkbox", htmlAttributes);
+            var tagBuilder = this.Input<TProperty>(null, "checkbox", htmlAttributes, immediate);
             tagBuilder.Checked(expression);
             if (checkedValue != null)
             {
@@ -123,32 +130,39 @@
             return tagBuilder;
         }
 
-        public KnockoutTagBuilder<TModel> Date<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Date<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
-            return Input(expression, "date", htmlAttributes);
+            return Input(expression, "date", htmlAttributes, immediate);
         }
 
-        public KnockoutTagBuilder<TModel> Email<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Email<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
-            return Input(expression, "email", htmlAttributes);
+            return Input(expression, "email", htmlAttributes, immediate);
         }
 
-        public KnockoutTagBuilder<TModel> File<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> File<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
-            return Input(expression, "file", htmlAttributes);
+            return Input(expression, "file", htmlAttributes, immediate);
         }
 
-        public KnockoutTagBuilder<TModel> Url<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> Url<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
-            return Input(expression, "url", htmlAttributes);
+            return Input(expression, "url", htmlAttributes, immediate);
         }
 
-        public KnockoutTagBuilder<TModel> TextArea<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null)
+        public KnockoutTagBuilder<TModel> TextArea<TProperty>(Expression<Func<TModel, TProperty>> expression, object htmlAttributes = null, bool immediate = false)
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "textarea", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
             tagBuilder.ApplyUnobtrusiveValidationAttributes(this.Context, tagBuilder, expression);
-            tagBuilder.Value(expression);
+            if (immediate)
+            {
+                tagBuilder.TextInput(expression);
+            }
+            else
+            {
+                tagBuilder.Value(expression);
+            }
             return tagBuilder;
         }
 

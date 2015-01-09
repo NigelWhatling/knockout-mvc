@@ -187,6 +187,24 @@
             return this;
         }
 
+        public KnockoutBinding<TModel> TextInput<TProperty>(Expression<Func<TModel, TProperty>> expression)
+        {
+            Items.Add(new KnockoutBindingItem("textInput", expression));
+            return this;
+        }
+
+        public KnockoutBinding<TModel> TextInput<TProperty, TParent>(KnockoutContext<TParent> context, Expression<Func<TParent, TProperty>> expression)
+        {
+            Items.Add(new KnockoutBindingItem("textInput", expression, context));
+            return this;
+        }
+
+        public KnockoutBinding<TModel> TextInput(string binding, bool isWord = false)
+        {
+            Items.Add(new KnockoutBindingStringItem("textInput", binding, isWord));
+            return this;
+        }
+
         public KnockoutBinding<TModel> Disable(Expression<Func<TModel, bool>> binding)
         {
             Items.Add(new KnockoutBindingItem("disable", binding));
