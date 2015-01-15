@@ -53,6 +53,7 @@
                 case ExpressionType.ConvertChecked:
                     return VisitUnary((UnaryExpression)exp, "");
                 case ExpressionType.ArrayLength:
+                    return VisitArrayLength((UnaryExpression)exp);
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
                     throw new NotSupportedException();
@@ -220,6 +221,12 @@
             string array = Visit(b.Left);
             string index = Visit(b.Right);
             return array + "[" + index + "]";
+        }
+
+        protected virtual string VisitArrayLength(UnaryExpression u)
+        {
+            string array = Visit(u.Operand);
+            return array + ".length";
         }
 
         protected virtual string VisitConstant(ConstantExpression c)
