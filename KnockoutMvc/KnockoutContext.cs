@@ -339,7 +339,7 @@
         {
             if (this.ActiveSubcontextCount == 0)
             {
-                return "";
+                return this.ContextStack.Count > 0 ? "$data" : String.Empty;
             }
             else if (this.ActiveSubcontextCount == 1)
             {
@@ -379,14 +379,15 @@
 
         public virtual KnockoutExpressionData CreateData()
         {
-            return new KnockoutExpressionData { InstanceNames = new[] { GetInstanceName() } };
+            return new KnockoutExpressionData { InstanceNames = new[] { this.GetInstanceName() } };
         }
 
         public virtual KnockoutBinding<TModel> Bind
         {
             get
             {
-                return new KnockoutBinding<TModel>(this, CreateData().InstanceNames, CreateData().Aliases);
+                KnockoutExpressionData data = this.CreateData();
+                return new KnockoutBinding<TModel>(this, data.InstanceNames, data.Aliases);
             }
         }
 
@@ -394,7 +395,8 @@
         {
             get
             {
-                return new KnockoutHtml<TModel>(viewContext, this, CreateData().InstanceNames, CreateData().Aliases);
+                KnockoutExpressionData data = this.CreateData();
+                return new KnockoutHtml<TModel>(viewContext, this, data.InstanceNames, data.Aliases);
             }
         }
 
@@ -402,8 +404,9 @@
         {
             get
             {
-                //return new KnockoutScript<TModel>(viewContext, this, CreateData().InstanceNames, CreateData().Aliases);
-                return new KnockoutScript<TModel>(viewContext, this, new string[] { ViewModelName }, null);
+                KnockoutExpressionData data = this.CreateData();
+                return new KnockoutScript<TModel>(viewContext, this, data.InstanceNames, data.Aliases);
+                //return new KnockoutScript<TModel>(viewContext, this, new string[] { ViewModelName }, null);
             }
         }
 
@@ -428,17 +431,17 @@
                 settings = new KnockoutExecuteSettings();
             }
 
-            string url = this.GetActionUrl(actionName, controllerName, routeValues);
+            string url = this.GetQuotedActionUrl(actionName, controllerName, routeValues);
             StringBuilder sb = new StringBuilder();
             sb.Append(this.ViewModelName + ".");
 
             if (isForm)
             {
-                sb.AppendFormat("submitForm(form, {0}, '{1}'", bindingOut ?? this.ViewModelName, url);
+                sb.AppendFormat("submitForm(form, {0}, {1}", bindingOut ?? this.ViewModelName, url);
             }
             else
             {
-                sb.AppendFormat("executeOnServer({0}, '{1}'", bindingOut ?? this.ViewModelName, url);
+                sb.AppendFormat("executeOnServer({0}, {1}", bindingOut ?? this.ViewModelName, url);
             }
 
             if (bindingIn != null || settingsProvided || successOverride != null)
@@ -473,7 +476,7 @@
             return new MvcHtmlString(exec);
         }
 
-        public string GetActionUrl(string actionName, string controllerName, object routeValues)
+        public string GetQuotedActionUrl(string actionName, string controllerName, object routeValues)
         {
             RouteValueDictionary newRoutes = new RouteValueDictionary(routeValues);
             Dictionary<string, KnockoutScriptItem> tokens = new Dictionary<string, KnockoutScriptItem>();
@@ -500,6 +503,24 @@
             foreach (string token in tokens.Keys)
             {
                 url = url.Replace(token, "'+" + tokens[token].ToHtmlString() + "+'");
+            }
+
+            if (url.StartsWith("'+"))
+            {
+                url = url.Substring(2);
+            }
+            else
+            {
+                url = "'" + url;
+            }
+
+            if (url.EndsWith("+'"))
+            {
+                url = url.Substring(0, url.Length - 2);
+            }
+            else
+            {
+                url = url + "'";
             }
 
             return url;

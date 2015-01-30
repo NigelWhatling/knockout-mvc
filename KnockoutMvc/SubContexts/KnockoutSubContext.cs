@@ -10,18 +10,18 @@
 
         protected KnockoutSubContext(KnockoutContext<TModel> context, string[] instanceNames = null, Dictionary<string, string> aliases = null)
         {
-            Context = context;
-            InstanceNames = instanceNames;
-            Aliases = aliases;
+            this.Context = context;
+            this.InstanceNames = instanceNames;
+            this.Aliases = aliases;
         }
 
         protected KnockoutExpressionData CreateData()
         {
             var data = new KnockoutExpressionData();
-            if (InstanceNames != null)
-                data.InstanceNames = InstanceNames;
-            if (Aliases != null)
-                data.Aliases = Aliases;
+            if (this.InstanceNames != null)
+                data.InstanceNames = this.InstanceNames;
+            if (this.Aliases != null)
+                data.Aliases = this.Aliases;
             return data.Clone();
         }
     }

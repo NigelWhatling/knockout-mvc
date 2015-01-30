@@ -24,7 +24,7 @@
             return new KnockoutScriptItem(name + "()");
         }
 
-        public KnockoutScriptItem GetObservable(Expression<Func<TModel, object>> prop)
+        public KnockoutScriptItem GetObservable<TProperty>(Expression<Func<TModel, TProperty>> prop)
         {
             string name = KnockoutExpressionConverter.Convert(prop, CreateData());
             return new KnockoutScriptItem(name + (name[0] == '(' ? String.Empty : "()"));

@@ -467,7 +467,7 @@
         {
             var tagBuilder = new KnockoutTagBuilder<TModel>(Context, "a", InstanceNames, Aliases);
             tagBuilder.ApplyAttributes(htmlAttributes);
-            tagBuilder.Attr("href", this.Context.GetActionUrl(actionName, controllerName, routeValues));
+            tagBuilder.Attr("href", this.Context.GetQuotedActionUrl(actionName, controllerName, routeValues), false);
             tagBuilder.SetInnerHtml(HttpUtility.HtmlEncode(caption));
             return tagBuilder;
         }
